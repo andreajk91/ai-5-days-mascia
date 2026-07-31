@@ -619,3 +619,45 @@ INFO:     127.0.0.1:34616 - "POST /run_sse HTTP/1.1" 200 OK
 [GCS ARCHIVED] Judgment judge_rec_task_sci_beb19b_iter1 saved to 'gs://blog-writer-audit-gen-lang-client-0748552619/judge-logs/judge_rec_task_sci_beb19b_iter1.json'
 👤 [PHASE 4: HUMAN REVIEW] Judge Agent APPROVED draft (Score: 0.92)! Presenting candidate article to Journalist for final review.
 2026-07-31 09:59:54,012 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 10:00:13,871 - INFO - google_llm.py:287 - Response received from the model.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-07-31 10:00:14,040 - INFO - runners.py:2265 - Closing runner...
+2026-07-31 10:00:14,044 - INFO - runners.py:2278 - Runner closed.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26669]
+=== Starting server at 2026-07-31T10:03:48.498639+00:00 ===
+Command: /home/admin_/ai-5-day/.venv/bin/adk api_server --host 127.0.0.1 --port 18080 --reload_agents --no-reload .
+CWD: /home/admin_/ai-5-day
+=== Started server process 27776 ===
+2026-07-31 10:03:51,003 - INFO - service_factory.py:266 - Using in-memory memory service
+2026-07-31 10:03:51,003 - INFO - local_storage.py:89 - Using per-agent session storage rooted at /home/admin_/ai-5-day
+2026-07-31 10:03:51,004 - INFO - local_storage.py:121 - Using per-agent artifact storage rooted at /home/admin_/ai-5-day
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/cli/fast_api.py:567: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+INFO:     Started server process [27776]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:18080 (Press CTRL+C to quit)
+INFO:     127.0.0.1:40466 - "GET / HTTP/1.1" 404 Not Found
+2026-07-31 10:03:51,551 - INFO - local_storage.py:65 - Creating local session service at /home/admin_/ai-5-day/app/.adk/session.db
+2026-07-31 10:03:51,562 - INFO - api_server.py:966 - New session created: be093371-198b-4f84-8e23-8716531740d0
+INFO:     127.0.0.1:40470 - "POST /apps/app/users/cli-user/sessions HTTP/1.1" 200 OK
+2026-07-31 10:03:51,573 - INFO - envs.py:83 - Loaded .env file for app at /home/admin_/ai-5-day/.env
+INFO:     127.0.0.1:40472 - "POST /run_sse HTTP/1.1" 200 OK
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/tools/transfer_to_agent_tool.py:72: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  function_decl = super()._get_declaration()
+2026-07-31 10:03:51,745 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 10:03:54,229 - INFO - google_llm.py:287 - Response received from the model.
+
+🔍 [PHASE 1: RESEARCH] Executing SEARCHER AGENT for web discovery & memory deduplication check...
+✍️ [PHASE 2A: SCIENCE_WRITER_NODE] Research received. Executing SCIENCE_WRITER_NODE to construct Financial Times / Nature style article...
+🎨 [PHASE 2B: IMAGE_GENERATOR_AGENT] Delegating hero image creation to Specialized Image Generator Agent for topic-tailored visual design...
+🎨 [IMAGE GENERATOR AGENT] Bespoke hero image generated for 'Navigating Recent Scientific Discoveries About Cancer'
+⚖️ [PHASE 3: JUDGE AGENT] Executing JUDGE AGENT to perform text & hero image rubric evaluation and detailed considerations...
+[AUDIT LOGGED] Judgment judge_rec_task_sci_3ee6b3_iter1 saved to BigQuery table 'gen-lang-client-0748552619.blog_system_audit.judge_decisions_v1'
+[GCS ARCHIVED] Judgment judge_rec_task_sci_3ee6b3_iter1 saved to 'gs://blog-writer-audit-gen-lang-client-0748552619/judge-logs/judge_rec_task_sci_3ee6b3_iter1.json'
+👤 [PHASE 4: HUMAN REVIEW] Judge Agent APPROVED draft & hero image (Text Score: 0.92, Image Relevance: 0.95)! Presenting candidate article to Journalist for final review.
+2026-07-31 10:03:54,378 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
