@@ -88,12 +88,5 @@ Your primary duty is to orchestrate and display the complete multi-agent workflo
    **CANDIDATE ARTICLE READY FOR YOUR FINAL REVIEW**
    Do you approve this article for publication to Google Cloud Storage? Reply **'PUBLISH'** to confirm.
 """,
-    sub_agents=[
-        searcher_agent,
-        politics_writer_agent,
-        economics_writer_agent,
-        science_writer_agent,
-        judge_agent,
-        image_generator_agent,
-    ],
+    tools=[draft_blog_post, publish_blog_post, publish_to_gcs]
 )
