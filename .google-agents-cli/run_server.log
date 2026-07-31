@@ -193,3 +193,14 @@ INFO:     127.0.0.1:52090 - "POST /run_sse HTTP/1.1" 200 OK
 2026-07-31 09:04:27,222 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
 2026-07-31 09:04:41,862 - INFO - google_llm.py:287 - Response received from the model.
 2026-07-31 09:04:41,991 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:04:47,443 - INFO - google_llm.py:287 - Response received from the model.
+[AUDIT LOGGED] Judgment judge_1785488687 saved to BigQuery table 'gen-lang-client-0748552619.blog_system_audit.judge_decisions_v1'
+[GCS ARCHIVED] Judgment judge_1785488687 saved to 'gs://blog-writer-audit-gen-lang-client-0748552619/judge-logs/judge_1785488687.json'
+2026-07-31 09:04:47,573 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:04:48,721 - INFO - google_llm.py:287 - Response received from the model.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-07-31 09:04:48,895 - INFO - runners.py:2265 - Closing runner...
+2026-07-31 09:04:48,896 - INFO - runners.py:2278 - Runner closed.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [15465]
