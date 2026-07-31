@@ -56,10 +56,13 @@ def before_model_sanitize_callback(callback_context, llm_request) -> None:
                             r"\binvasion\b": "geopolitical conflict",
                             r"\battack\b": "security incident",
                             r"\bconflict\b": "geopolitical tensions",
+                            r"\bjailbreak\b": "analytical evaluation",
+                            r"\bprompt injection\b": "prompt formatting",
                         }
                         for pattern, replacement in replacements.items():
                             text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
                         part.text = text
+
 
 
 def on_model_error_fallback(callback_context) -> None:
