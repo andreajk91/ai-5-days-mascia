@@ -1,7 +1,7 @@
-# Architectural Blueprint: Automated Blog Writer Agent System
+# Architectural Blueprint: Automated Blog Writer Agent System (ADK 2.0)
 
 ## Executive Summary
-The **Automated Blog Writer Agent** is an enterprise-grade multi-agent platform designed to automate and scale high-quality blog production across three major domains: **Politics**, **Economics**, and **Science**. Built using Google's **Agent Development Kit (ADK)**, the system leverages **Agent-to-Agent (A2A)** protocols for inter-agent communication, **`agents-cli`** for project scaffolding and evaluation, and integrates with **Gemini Enterprise** to serve as the user interface for journalists and editors. 
+The **Automated Blog Writer Agent** is an enterprise-grade multi-agent platform designed to automate and scale high-quality blog production across three major domains: **Politics**, **Economics**, and **Science**. Built using Google's **Agent Development Kit 2.0 (ADK 2.0)** Graph Workflow API, the system leverages explicit state graph topologies (nodes, edges, conditional branching, fan-out/fan-in, and Human-in-the-Loop nodes), **Agent-to-Agent (A2A)** protocols for inter-agent communication, **`agents-cli`** for project scaffolding and evaluation, and integrates with **Gemini Enterprise** to serve as the user interface for journalists and editors. 
 
 All agents share **Shared Session Memory** for active workflow state and **Long Retention Memory (Memory Bank)** for persistent context across sessions. **100% of all Judge Agent judgments and evaluation decisions are permanently stored** in a dedicated audit data store (BigQuery / GCS) for continuous compliance and evaluation. All codebase assets, configurations, and evaluation benchmarks are version-controlled and pushed to the remote GitHub repository: `https://github.com/andreajk91/ai-5-days-mascia.git`.
 
@@ -9,70 +9,63 @@ Final approved articles are stored in **Google Cloud Storage (GCS)** and rendere
 
 ---
 
-## 1. System Architecture & Workflow Overview
+## 1. ADK 2.0 Graph Workflow Architecture
 
 ```mermaid
 flowchart TD
-    subgraph Human Interface
-        J[Journalist / Editor] <-->|Prompt / Review| RA[Root Orchestrator Agent\nGemini Enterprise]
+    subgraph ADK 2.0 Graph Workflow Nodes & Edges
+        Start([Start Node: Journalist Topic Input]) --> RootNode[Root Orchestrator Node]
+        
+        RootNode -->|Edge: Dispatch A2A| SearchNode[Searcher Agent Node]
+        SearchNode -->|Edge: 3-4 Articles Research Bundle| WriterNode{Domain Writer Node}
+        
+        WriterNode -->|Politics Branch| PolWriter[Politics Writer Node]
+        WriterNode -->|Economics Branch| EconWriter[Economics Writer Node]
+        WriterNode -->|Science Branch| SciWriter[Science Writer Node]
+        
+        PolWriter -->|Edge: A2A Draft Payload| JudgeNode[Judge Agent Node]
+        EconWriter -->|Edge: A2A Draft Payload| JudgeNode
+        SciWriter -->|Edge: A2A Draft Payload| JudgeNode
+        
+        JudgeNode -->|Conditional Edge: REJECTED\nRetry Loop w/ Critique| WriterNode
+        JudgeNode -->|Conditional Edge: APPROVED| HITLNode[Human-in-the-Loop Node\nGemini Enterprise Review]
+        
+        HITLNode -->|Approved by Journalist| PublishNode[Publication Node\nUpload to GCS]
+        HITLNode -->|Rejection / Edits| WriterNode
+        
+        PublishNode --> End([End Node: Rendered on Cloud Run])
     end
 
     subgraph Memory & Audit Infrastructure
-        SM[(Shared Session Memory\nShort-Term Context)]
+        SM[(Shared Session Memory\nShort-Term Graph Context)]
         LM[(Long Retention Memory\nADK Memory Bank / Vector Store)]
         JDB[(Judge Audit Log Store\nBigQuery & GCS\n100% Decision Persistence)]
     end
 
-    subgraph ADK Multi-Agent System (A2A Communication)
-        RA -->|A2A: Research Request| SA[Searcher Agent]
-        SA -->|A2A: 3-4 Curated Articles| WA{Area-Specific Writer Agent}
-        
-        WA -->|Politics| WA1[Politics Writer Agent]
-        WA -->|Economics| WA2[Economics Writer Agent]
-        WA -->|Science| WA3[Science Writer Agent]
-        
-        WA1 -->|A2A: Draft + Image| JA[Judge Agent]
-        WA2 -->|A2A: Draft + Image| JA
-        WA3 -->|A2A: Draft + Image| JA
-        
-        JA -->|Pass: Approved| RA
-        JA -->|Fail: Feedback & Re-write| WA
-        JA -->|Mandatory Persist All Decisions| JDB
-
-        RA <---> SM & LM
-        SA <---> SM & LM
-        WA1 <---> SM & LM
-        WA2 <---> SM & LM
-        WA3 <---> SM & LM
-        JA <---> SM & LM
-    end
-
-    subgraph Publishing & Delivery
-        RA -->|User Approved| GCS[(GCS Bucket\nArticles & Images)]
-        GCS --> CloudRun[Cloud Run Web App\nPublic Blog]
-        CloudRun -->|User Feedback| FB[(Thumbs Up/Down Metric Store)]
-    end
-
-    subgraph Version Control & CI/CD
-        Repo[GitHub Remote Repository\nhttps://github.com/andreajk91/ai-5-days-mascia.git]
-    end
+    JudgeNode -->|Mandatory Synchronous Log| JDB
+    RootNode <---> SM & LM
+    SearchNode <---> SM & LM
+    WriterNode <---> SM & LM
+    JudgeNode <---> SM & LM
 ```
 
-### End-to-End Workflow Execution Sequence
-1. **Initiation**: The journalist inputs a topic and selects the domain (*Politics*, *Economics*, or *Science*) via Gemini Enterprise, interacting directly with the **Root Orchestrator Agent**.
-2. **Research Phase**: The Root Agent sends an A2A task to the **Searcher Agent**. The Searcher Agent conducts web research, gathers 3–4 high-credibility articles, filters noise, checks against Memory Bank to avoid topic duplication, and returns structured research context.
-3. **Drafting Phase**: The Root Agent routes the research bundle to the specialized **Writer Agent** (Politics, Economics, or Science). The Writer Agent synthesizes the news, generates commentary, drafts standard sections (*Catchy Title*, *Hero Image*, *Introduction*, *Body*, *Conclusion*), and creates the initial article draft.
-4. **Evaluation & Quality Assurance (Judge Loop)**: The Writer Agent transmits the draft to the **Judge Agent** via A2A.
+---
+
+## 2. End-to-End ADK 2.0 Execution Sequence
+1. **Initiation (Start Node)**: The journalist inputs a topic and selects the domain (*Politics*, *Economics*, or *Science*) via Gemini Enterprise, interacting directly with the **Root Orchestrator Node**.
+2. **Research Phase (Searcher Node)**: The Root Node executes an A2A transition to the **Searcher Agent Node**. The Searcher Agent conducts web research, gathers 3–4 high-credibility articles, checks against Memory Bank to avoid topic duplication, and returns structured research context.
+3. **Drafting Phase (Writer Nodes)**: Graph routes the research bundle to the specialized **Writer Node** (Politics, Economics, or Science). The Writer Agent synthesizes the news, generates commentary, drafts standard sections (*Catchy Title*, *Hero Image*, *Introduction*, *Body*, *Conclusion*), and creates the initial article draft.
+4. **Evaluation & Quality Assurance (Judge Node)**: The Writer Node transmits the draft to the **Judge Agent Node** via A2A.
    - **Quality Check**: The Judge evaluates factual coherence, structure, sentence fluency, and domain alignment.
    - **Mandatory Decision Persistence**: The Judge logs 100% of decisions (scores, critique, draft snapshot, pass/fail status) to BigQuery & GCS.
-   - **Rejection Loop**: If quality thresholds are not met, the Judge returns actionable feedback to the Writer Agent to re-draft (capped at max 3 retries).
-5. **Human-in-the-Loop Review**: Once the Judge approves, the Root Agent presents the candidate article to the human editor/journalist in Gemini Enterprise for final review.
-6. **Publication**: Upon human approval, the Root Agent compiles the article payload (JSON + HTML + Hero Image asset) and uploads it to the designated GCS Bucket.
+   - **Conditional Rejection Edge**: If quality thresholds are not met, a directed edge routes actionable feedback back to the Writer Node to re-draft (capped at max 3 retries).
+5. **Human-in-the-Loop Review (HITL Node)**: Once the Judge approves, a conditional edge transitions to the HITL Node, presenting the candidate article to the human editor/journalist in Gemini Enterprise for final review.
+6. **Publication (Publish Node)**: Upon human approval, the Root Node compiles the article payload (JSON + HTML + Hero Image asset) and uploads it to the designated GCS Bucket.
 7. **Public Serving & Feedback**: The Cloud Run web application dynamically fetches articles from GCS and provides a public UI with category filters and interactive thumbs-up/down voting.
 
 ---
 
-## 2. Judge Agent Zero-Loss Judgment Storage Architecture
+## 3. Judge Agent Zero-Loss Judgment Storage Architecture
 
 Every single decision made by the **Judge Agent** (whether an article is `APPROVED` or `REJECTED`) is captured synchronously and stored permanently. No article can move forward or return to a writer without its judgment record being committed.
 
@@ -94,34 +87,34 @@ For every evaluation, the Judge Agent automatically generates and persists a str
 
 ---
 
-## 3. Shared Session Memory & Long Retention Memory Architecture
+## 4. Shared Session Memory & Long Retention Memory Architecture
 
 ### A. Shared Session Memory (Short-Term Execution State)
-- **Scope**: Active lifecycle of a specific blog generation request (from user topic entry to publication).
-- **Mechanism**: Unified ADK `Session` state shared across all agents in the pipeline.
+- **Scope**: Active lifecycle of a specific blog generation request.
+- **Mechanism**: Unified ADK `Session` state shared across graph nodes.
 - **Data Stored**: User topic, raw search results, active draft, judge feedback, and iteration counter.
 
 ### B. Long Retention Memory (Long-Term Memory Bank)
-- **Scope**: Persistent memory across conversations, sessions, and days/weeks of article creation.
+- **Scope**: Persistent memory across conversations and days/weeks of article creation.
 - **Mechanism**: ADK `MemoryBank` backed by Vertex AI Vector Search / Document Store.
 - **Data Stored**: Journalist editorial preferences, topic anti-duplication history, historical Judge critiques, and audience thumbs-up/down feedback.
 
 ---
 
-## 4. Detailed Agent Specifications, Tools & Skills
+## 5. Detailed Agent Specifications, Tools & Skills
 
-| Agent Name | Role & Specialization | Memory Access | Skills Required | Custom Tools & Integrations |
+| Agent / Node Name | Role & Specialization | Memory Access | Skills Required | Custom Tools & Integrations |
 | :--- | :--- | :--- | :--- | :--- |
-| **Root Orchestrator Agent** | User interface bridge to Gemini Enterprise; orchestrates A2A routing, human approval, and publication. | Session Memory (RW)<br>Long Retention (RW) | - Workflow Orchestration Skill<br>- Gemini Enterprise Integration Skill<br>- GCS Artifact Management Skill | - `a2a_send_message`<br>- `gcs_upload_article`<br>- `gemini_enterprise_connector` |
-| **Searcher Agent** | Web discovery expert; locates, filters, and summarizes 3–4 top news articles per topic. | Session Memory (RW)<br>Long Retention (Read) | - Web Research & Fact-Finding Skill<br>- Topic Anti-Duplication Skill<br>- Source Credibility Skill | - `google_search` / `custom_search_api`<br>- `web_fetch_content`<br>- `article_cleaner_tool` |
+| **Root Orchestrator Agent** | ADK 2.0 Graph Root; user interface bridge to Gemini Enterprise; orchestrates A2A routing and HITL node. | Session Memory (RW)<br>Long Retention (RW) | - ADK 2.0 Graph Workflow Skill<br>- Gemini Enterprise Skill<br>- GCS Management Skill | - `a2a_send_message`<br>- `gcs_upload_article`<br>- `gemini_enterprise_connector` |
+| **Searcher Agent** | Web discovery node; locates, filters, and summarizes 3–4 top news articles per topic. | Session Memory (RW)<br>Long Retention (Read) | - Web Research Skill<br>- Topic Anti-Duplication Skill<br>- Source Credibility Skill | - `google_search` / `custom_search_api`<br>- `web_fetch_content`<br>- `article_cleaner_tool` |
 | **Politics Writer Agent** | Subject matter expert in geopolitical analysis, public policy, and global news synthesis. | Session Memory (RW)<br>Long Retention (RW) | - Political Science Commentary Skill<br>- Editorial Style Memory Skill<br>- Headline Writing Skill | - `generate_hero_image` (Vertex Imagen 3)<br>- `markdown_formatter`<br>- `political_tone_checker` |
-| **Economics Writer Agent**| Subject matter expert in macroeconomics, global markets, trade, and financial trends. | Session Memory (RW)<br>Long Retention (RW) | - Financial Analysis Skill<br>- Editorial Style Memory Skill<br>- Data Visualization Prompting Skill | - `generate_hero_image` (Vertex Imagen 3)<br>- `markdown_formatter`<br>- `economic_term_validator` |
+| **Economics Writer Agent**| Subject matter expert in macroeconomics, global markets, trade, and financial trends. | Session Memory (RW)<br>Long Retention (RW) | - Financial Analysis Skill<br>- Editorial Style Memory Skill<br>- Data Visualization Skill | - `generate_hero_image` (Vertex Imagen 3)<br>- `markdown_formatter`<br>- `economic_term_validator` |
 | **Science Writer Agent** | Subject matter expert in breakthrough technology, space, AI, and peer-reviewed research. | Session Memory (RW)<br>Long Retention (RW) | - Scientific Literacy Skill<br>- Popular Science Journalism Skill<br>- Editorial Style Memory Skill | - `generate_hero_image` (Vertex Imagen 3)<br>- `markdown_formatter`<br>- `scientific_reference_tool` |
 | **Judge Agent** | Quality gatekeeper; enforces standards on form, coherence, grammar, and topic adherence. | Session Memory (RW)<br>Long Retention (RW)<br>**Judgment Persistence (Mandatory Write)** | - Editorial Evaluation Skill<br>- Historical Quality Pattern Skill<br>- Mandatory Audit Logging Skill | - `log_judge_decision` (BigQuery/GCS Logger)<br>- `coherence_scoring_tool`<br>- `plagiarism_and_fact_validator` |
 
 ---
 
-## 5. Persistent Judge Record Schema (BigQuery / GCS JSON)
+## 6. Persistent Judge Record Schema (BigQuery / GCS JSON)
 
 ```json
 {
@@ -157,7 +150,7 @@ For every evaluation, the Judge Agent automatically generates and persists a str
 
 ---
 
-## 6. Version Control & Remote Repository Integration
+## 7. Version Control & Remote Repository Integration
 
 ### Git Remote Repository
 - **Target URL**: `https://github.com/andreajk91/ai-5-days-mascia.git`
@@ -165,69 +158,60 @@ For every evaluation, the Judge Agent automatically generates and persists a str
   - Executed git remote probe and test push to `main` branch.
   - Machine has active git push authorization.
 - **Git Commit Workflow**:
-  - All project scaffolding, ADK agent code, tools, skills, evaluation benchmarks, and Cloud Run web frontend files will be systematically committed and pushed to `origin main`.
+  - All project scaffolding, ADK 2.0 agent code, tools, skills, evaluation benchmarks, and Cloud Run web frontend files will be systematically committed and pushed to `origin main`.
   - CI/CD workflow (`.github/workflows/deploy.yml`) included in the repo for automated testing and deployment.
 
 ---
 
-## 7. Project Directory Structure (`agents-cli`)
+## 8. Project Directory Structure (`agents-cli`)
 
 ```
-blog-writer-system/
-├── .agents-cli-spec.md                # System specification & architectural constraints
-├── .github/
-│   └── workflows/
-│       ├── eval.yml                   # Automated ADK eval workflow
-│       └── deploy.yml                 # Cloud Run deployment workflow
-├── pyproject.toml                      # Dependencies (google-agents-cli, adk, fastapi, etc.)
-├── deployment.yaml                     # GCP deployment configuration
-├── Makefile                            # Utility commands (setup, eval, deploy, git-push)
+ai-5-days-mascia/
+├── ARCHITECTURE_PLAN.md                # ADK 2.0 System specification blueprint
+├── README.md                           # Repository entrypoint
+├── pyproject.toml                      # Dependencies (google-agents-cli, adk >= 2.0.0, etc.)
+├── Dockerfile                          # Cloud Run deployment configuration
 │
-├── src/                                # Agent implementations
-│   ├── root_orchestrator/              # Root Agent (Gemini Enterprise facing)
-│   │   ├── agent.py
-│   │   └── tools.py
-│   ├── searcher_agent/                 # Searcher Agent
-│   │   ├── agent.py
-│   │   └── tools.py
-│   ├── writer_agents/                  # Domain Writers
-│   │   ├── politics_writer.py
-│   │   ├── economics_writer.py
-│   │   ├── science_writer.py
-│   │   └── image_tool.py
-│   ├── judge_agent/                    # Judge Agent
-│   │   ├── agent.py
-│   │   ├── evaluator_rules.py
-│   │   └── audit_logger.py             # Mandated BigQuery/GCS Audit Logger
-│   ├── memory/                         # Shared & Long-Term Memory
-│   │   ├── session_store.py            # Shared Session Memory client
-│   │   └── memory_bank.py              # Long Retention Memory Bank client
-│   └── common/                         # Shared A2A protocol & GCS utilities
-│       ├── a2a_client.py
-│       └── gcs_client.py
+├── src/                                # Source Code
+│   ├── graph_workflow.py               # ADK 2.0 Graph Workflow Nodes & Directed Edges
+│   ├── agents/                         # Dedicated Agent Directories
+│   │   ├── root_orchestrator/          # Root Agent (Gemini Enterprise facing)
+│   │   │   ├── agent.py
+│   │   │   └── tools.py
+│   │   ├── searcher_agent/             # Searcher Agent (Web discovery)
+│   │   │   ├── agent.py
+│   │   │   └── tools.py
+│   │   ├── politics_writer_agent/      # Politics Writer SME
+│   │   │   ├── agent.py
+│   │   │   └── tools.py
+│   │   ├── economics_writer_agent/     # Economics Writer SME
+│   │   │   ├── agent.py
+│   │   │   └── tools.py
+│   │   ├── science_writer_agent/       # Science Writer SME
+│   │   │   ├── agent.py
+│   │   │   └── tools.py
+│   │   └── judge_agent/                # Judge Agent (Quality Gatekeeper)
+│   │       ├── agent.py
+│   │       ├── audit_logger.py         # Mandated 100% BigQuery/GCS audit persistence
+│   │       └── tools.py
+│   │
+│   ├── common/                         # Standard A2A Protocol Infrastructure
+│   │   └── a2a_protocol.py             # A2A Message schemas, payloads, and Async A2AClient
+│   │
+│   └── memory/                         # Shared Memory Infrastructure
+│       ├── session_memory.py           # Shared Short-Term Session State
+│       └── long_retention_memory.py    # ADK Memory Bank (Style prefs, Anti-duplication)
 │
-├── eval/                               # Evaluation Suite (ADK Eval)
-│   ├── eval_config.yaml                # Eval metrics & LLM-as-judge setup
-│   ├── datasets/                       # Benchmark datasets per domain
-│   │   ├── searcher_eval.jsonl
-│   │   ├── writer_eval.jsonl
-│   │   └── judge_eval.jsonl
-│   └── dashboard/                      # Evaluation Dashboard Web App
-│       ├── app.py                      # Streamlit/React dashboard app (reads Judge Audit Store)
-│       └── metrics_fetcher.py
+├── eval/                               # Evaluation Suite Directories
+│   ├── datasets/                       # Benchmark evaluation JSONL datasets
+│   └── dashboard/                      # Streamlit / React evaluation dashboard app
 │
-└── web_frontend/                       # Public Cloud Run Web Site
-    ├── package.json
-    ├── src/
-    │   ├── pages/ (Politics, Economics, Science, ArticleDetail)
-    │   ├── components/ (ArticleCard, ThumbsRating, Header)
-    │   └── lib/gcs_fetcher.ts
-    └── Dockerfile
+└── web_frontend/                       # Cloud Run Public Blog Web App
 ```
 
 ---
 
-## 8. End-to-End Evaluation Framework & Dashboard
+## 9. End-to-End Evaluation Framework & Dashboard
 
 1. **Searcher Agent Evaluation**: Relevance score, source credibility index.
 2. **Writer Agents Evaluation**: Structure compliance, catchy title rating, domain depth, memory utilization score.
@@ -237,12 +221,12 @@ blog-writer-system/
 
 ---
 
-## 9. Implementation Roadmap & Milestones
+## 10. Implementation Roadmap & Milestones
 
 | Phase | Key Deliverables | Verification / Acceptance Gate |
 | :--- | :--- | :--- |
-| **Phase 1: Project Setup & Git Sync** | - Run `agents-cli scaffold create`<br>- Configure shared session memory & Memory Bank<br>- Commit & push initial scaffold to `https://github.com/andreajk91/ai-5-days-mascia.git` | `git push origin main` succeeds; project structure active. |
-| **Phase 2: Agent, Memory & Audit Persistence** | - Implement Searcher, Writer (3 domains), Judge, and Root Agents<br>- Connect Shared Session & Long Retention Memory<br>- Integrate 100% persistent Judge Audit logging to BigQuery/GCS | `agents-cli run` completes full multi-agent dry run; Judge log entry verified in BigQuery/GCS. |
+| **Phase 1: Project Setup & Git Sync (Completed)** | - Run `agents-cli scaffold create`<br>- Configure shared session memory & Memory Bank<br>- Create agent directories & commit to `https://github.com/andreajk91/ai-5-days-mascia.git` | `git push origin main` succeeds; project structure active. |
+| **Phase 2: ADK 2.0 Graph Workflow & Agent Logic** | - Define ADK 2.0 graph workflow nodes & edges (`src/graph_workflow.py`)<br>- Connect Searcher, Writer (3 domains), Judge, and HITL nodes<br>- Connect Shared Session & Long Retention Memory<br>- Integrate 100% persistent Judge Audit logging to BigQuery/GCS | `agents-cli run` completes full multi-agent graph dry run; Judge log entry verified in BigQuery/GCS. |
 | **Phase 3: Evaluation Suite & Dashboard** | - Write evaluation datasets and LLM-as-judge rules<br>- Build Streamlit evaluation dashboard connected to Judge Audit Store<br>- Push eval scripts to GitHub | `agents-cli eval run` generates quality reports and renders judge history on dashboard. |
 | **Phase 4: Web Frontend & Cloud Run** | - Build Next.js / Vite web application<br>- Implement GCS article fetcher & Thumbs API<br>- Dockerize and configure Cloud Run | Web app renders articles from GCS with live thumbs voting. |
 | **Phase 5: Production Deployment & Push** | - Deploy Cloud Run service and Agent Runtime<br>- Register Root Agent with Gemini Enterprise<br>- Perform final `git push` of full codebase | Complete production system live and fully synchronized on GitHub. |
