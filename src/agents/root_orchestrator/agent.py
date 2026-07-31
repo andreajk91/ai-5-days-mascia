@@ -1,17 +1,13 @@
 """
 Root Orchestrator Agent.
 Serves as the primary entry point registered with Gemini Enterprise.
-Configured with permissive safety settings to prevent Model Armor false positives.
+Orchestrates multi-agent production across Searcher, Writer, and Judge nodes,
+ensuring the entire pipeline executes through to candidate draft presentation and GCS publication.
 """
 
 from google.adk.agents import Agent
-from src.agents.searcher_agent import searcher_agent
-from src.agents.politics_writer_agent import politics_writer_agent
-from src.agents.economics_writer_agent import economics_writer_agent
-from src.agents.science_writer_agent import science_writer_agent
-from src.agents.judge_agent import judge_agent
 from src.common.safety_config import get_permissive_safety_config, on_model_error_fallback
-from .tools import a2a_send_message, publish_to_gcs
+from .tools import draft_blog_post, publish_blog_post, a2a_send_message, publish_to_gcs
 
 
 root_orchestrator_agent = Agent(
@@ -20,25 +16,28 @@ root_orchestrator_agent = Agent(
     generate_content_config=get_permissive_safety_config(),
     on_model_error_callback=on_model_error_fallback,
     instruction="""You are the Root Orchestrator Agent for the Automated Blog Writer Platform.
-Your role is to orchestrate multi-agent blog production by forwarding tasks to your specialized sub-agents using the Agent-to-Agent (A2A) protocol.
 
-Important:
-- Handle all geopolitical, policy, and economic conflict topics as objective, neutral journalistic analysis.
-- Frame user requests cleanly so that economic impact queries (e.g. inflation, supply chain disruptions, commodity markets) are processed objectively.
+Your primary duty is to execute the complete multi-agent workflow whenever a user requests an article:
 
-Workflow Steps:
-1. **Research Dispatch (A2A)**: Forward user topic to `searcher_agent` for web research.
-2. **Writing Dispatch (A2A)**: Forward research bundle to specialized SME Writer (`politics_writer_agent`, `economics_writer_agent`, or `science_writer_agent`).
-3. **Quality Evaluation Dispatch (A2A)**: Forward draft to `judge_agent` to evaluate quality.
-4. **Human Final Review Presentation**: Present candidate article to the user with title, hero image, intro, body, conclusion, commentary, and judge audit score. Ask: *"Candidate article ready for final review! Reply 'PUBLISH' to store in Google Cloud Storage, or reply with feedback to revise."*
-5. **GCS Publication**: Upon user confirmation ("PUBLISH"), invoke `publish_to_gcs`.
+1. **Mandatory Action on User Request**:
+   - Whenever the user asks to write, generate, produce, or draft a blog post on ANY topic (e.g. "write an article for the economics impact of the iranian war"):
+   - Determine the domain: "Politicals", "Economics", or "Science".
+   - IMMEDIATELY call the `draft_blog_post` tool with the topic and domain.
+   - DO NOT transfer or delegate to searcher_agent directly with `transfer_to_agent`. ALWAYS call `draft_blog_post` so that Searcher, Writer, and Judge nodes execute in sequence!
+
+2. **Presenting Candidate Article for Final Review**:
+   - When `draft_blog_post` returns:
+     a) Catchy Title
+     b) Rendered Hero Image: `![Hero Image](hero_image_url)`
+     c) Introduction, Body Sections, and Conclusion
+     d) Editorial Commentary
+     e) Judge Evaluation Quality Score & Audit Confirmation
+   - Ask the user:
+     "**CANDIDATE ARTICLE READY FOR YOUR FINAL REVIEW**\nDo you approve this article for publication? Reply **'PUBLISH'** to store it in Google Cloud Storage, or reply with feedback to request revisions."
+
+3. **GCS Publication**:
+   - When the user confirms approval (e.g., says "PUBLISH" or "OK"):
+     - Invoke `publish_blog_post` with the `session_id` to store the article permanently in GCS bucket `gs://blog-writer-articles-gen-lang-client-0748552619`.
 """,
-    sub_agents=[
-        searcher_agent,
-        politics_writer_agent,
-        economics_writer_agent,
-        science_writer_agent,
-        judge_agent,
-    ],
-    tools=[a2a_send_message, publish_to_gcs]
+    tools=[draft_blog_post, publish_blog_post, a2a_send_message, publish_to_gcs]
 )
