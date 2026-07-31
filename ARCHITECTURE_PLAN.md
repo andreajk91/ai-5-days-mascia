@@ -9,6 +9,31 @@ Final approved articles are stored in **Google Cloud Storage (GCS)** and rendere
 
 ---
 
+## Phase 0: Technology Framework, Regional Mapping & Pre-Deployment Audit
+
+> **Security & Governance Rule**: In accordance with security standards, all specific GCP Project IDs, service account keys, tokens, and sensitive credentials are strictly excluded from this specification file and are dynamically resolved at runtime via environment variables (`${GOOGLE_CLOUD_PROJECT}`).
+
+### 1. Framework & Tooling Matrix
+- **Core Multi-Agent Framework**: Google **Agent Development Kit 2.0 (ADK 2.0)** Graph Workflow API (`google-adk >= 2.0.0`).
+- **CLI & Scaffolding Tool**: `agents-cli` v1.2.1.
+- **Inter-Agent Communication Protocol**: Native **Agent-to-Agent (A2A)** Protocol (`A2AMessage` JSON over HTTP/gRPC).
+- **Version Control**: Git & GitHub (`https://github.com/andreajk91/ai-5-days-mascia.git`).
+
+### 2. Regional Deployment Mapping
+- **LLM / Model Calling Region**: **`global`**
+  - *Rationale*: Enforces `GOOGLE_CLOUD_LOCATION=global` for all Vertex AI / Gemini API model invocations to prevent regional 404 errors and optimize LLM throughput.
+- **GCP Infrastructure Region**: **`us-central1`**
+  - *Rationale*: Used for all GCP physical resources, including Google Cloud Storage (GCS) buckets, BigQuery audit datasets, Cloud Run frontend services, and session state.
+
+### 3. Sanitized Resource Specifications
+- **Articles & Media Storage**: `gs://${GOOGLE_CLOUD_PROJECT}-blog-articles` (Region: `us-central1`)
+- **Judge Audit Persistence Storage**: `gs://${GOOGLE_CLOUD_PROJECT}-blog-audit` (Region: `us-central1`)
+- **Long Retention Memory Bank**: `gs://${GOOGLE_CLOUD_PROJECT}-blog-memory` (Region: `us-central1`)
+- **Judge Audit Analytical Database**: `${GOOGLE_CLOUD_PROJECT}:blog_system_audit.judge_decisions_v1` (Region: `us-central1`)
+- **Public Frontend Hosting**: Cloud Run Service `blog-writer-web` (Region: `us-central1`)
+
+---
+
 ## 1. ADK 2.0 Graph Workflow Architecture
 
 ```mermaid
@@ -82,8 +107,8 @@ For every evaluation, the Judge Agent automatically generates and persists a str
 5. **Final Decision**: `APPROVED` or `REJECTED`.
 
 ### Storage Backend Implementation
-- **Primary Data Store (BigQuery)**: Low-latency analytical query store (`blog_system_audit.judge_decisions_v1`) powering the Evaluation Dashboard and quality analysis.
-- **Secondary Asset Archive (GCS)**: Raw JSON artifacts stored in `gs://blog-system-audit-bucket/judge-logs/YYYY/MM/DD/{judgment_id}.json`.
+- **Primary Data Store (BigQuery)**: Low-latency analytical query store (`${GOOGLE_CLOUD_PROJECT}.blog_system_audit.judge_decisions_v1`) powering the Evaluation Dashboard and quality analysis.
+- **Secondary Asset Archive (GCS)**: Raw JSON artifacts stored in `gs://${GOOGLE_CLOUD_PROJECT}-blog-audit/judge-logs/YYYY/MM/DD/{judgment_id}.json`.
 
 ---
 
@@ -128,7 +153,7 @@ For every evaluation, the Judge Agent automatically generates and persists a str
   "decision": "REJECTED",
   "article_snapshot": {
     "title": "Power Shift: How New Energy Agreements Are Reshaping Global Coalitions",
-    "hero_image_url": "gs://blog-assets-bucket/images/pol_89201_hero.png",
+    "hero_image_url": "gs://${GOOGLE_CLOUD_PROJECT}-blog-articles/images/pol_89201_hero.png",
     "introduction": "As international summits conclude this quarter...",
     "body_sections_count": 2,
     "conclusion": "In summary, the transition is no longer just ecological...",
@@ -215,7 +240,7 @@ ai-5-days-mascia/
 
 1. **Searcher Agent Evaluation**: Relevance score, source credibility index.
 2. **Writer Agents Evaluation**: Structure compliance, catchy title rating, domain depth, memory utilization score.
-3. **Judge Agent Evaluation**: Judge consistency, critique actionability, audit completeness.
+3. **Judge Agent Evaluation**: Judge Consistency, critique actionability, audit completeness.
 4. **End-to-End Workflow Evaluation**: Pass rate at iteration 1, total flow latency, human acceptance rate.
 5. **Dashboard**: Real-time telemetry, live Judge decision audit browser (reading directly from BigQuery/GCS persistent logs), and audience thumbs-up/thumbs-down analytics.
 
@@ -225,6 +250,7 @@ ai-5-days-mascia/
 
 | Phase | Key Deliverables | Verification / Acceptance Gate |
 | :--- | :--- | :--- |
+| **Phase 0: Pre-Deployment Audit & Framework Setup (Completed)** | - Framework: ADK 2.0 Graph Workflow & `agents-cli` v1.2.1<br>- Regional Mapping: Model `global`, Infrastructure `us-central1`<br>- Sanitized Plan file excluding raw Project IDs/secrets | Phase 0 requirements verified and documented. |
 | **Phase 1: Project Setup & Git Sync (Completed)** | - Run `agents-cli scaffold create`<br>- Configure shared session memory & Memory Bank<br>- Create agent directories & commit to `https://github.com/andreajk91/ai-5-days-mascia.git` | `git push origin main` succeeds; project structure active. |
 | **Phase 2: ADK 2.0 Graph Workflow & Agent Logic** | - Define ADK 2.0 graph workflow nodes & edges (`src/graph_workflow.py`)<br>- Connect Searcher, Writer (3 domains), Judge, and HITL nodes<br>- Connect Shared Session & Long Retention Memory<br>- Integrate 100% persistent Judge Audit logging to BigQuery/GCS | `agents-cli run` completes full multi-agent graph dry run; Judge log entry verified in BigQuery/GCS. |
 | **Phase 3: Evaluation Suite & Dashboard** | - Write evaluation datasets and LLM-as-judge rules<br>- Build Streamlit evaluation dashboard connected to Judge Audit Store<br>- Push eval scripts to GitHub | `agents-cli eval run` generates quality reports and renders judge history on dashboard. |
