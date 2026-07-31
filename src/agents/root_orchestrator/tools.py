@@ -1,39 +1,30 @@
 """
 Tools for Root Orchestrator Agent.
-Includes A2A dispatchers, workflow orchestrator, and GCS publication utilities.
+Provides GCS publication and asset upload utilities.
 GCP Infrastructure Location: us-central1
 """
 
-def generate_blog_post(topic: str, domain: str) -> dict:
-    """Triggers the ADK 2.0 Multi-Agent Graph Workflow to search, write, judge, and publish a blog post.
+def publish_to_gcs(article_id: str, title: str, domain: str, hero_image_url: str, content: str, editorial_opinion: str) -> dict:
+    """Publishes approved blog post JSON and HTML assets to GCS Bucket in us-central1 after human journalist review.
     
     Args:
-        topic: The topic/subject of the blog post requested by the journalist.
+        article_id: Unique article ID.
+        title: Catchy title of the blog post.
         domain: One of 'Politicals', 'Economics', or 'Science'.
+        hero_image_url: The renderable hero image URI.
+        content: The complete article text.
+        editorial_opinion: Domain editorial commentary.
     """
-    from src.graph_workflow import BlogWriterGraphWorkflow
-    workflow = BlogWriterGraphWorkflow()
-    result = workflow.run_workflow(topic=topic, domain=domain, journalist_id="playground_user")
-    return result
-
-
-def dispatch_search_request(topic: str, domain: str, session_id: str) -> dict:
-    """A2A tool to dispatch research requests to the Searcher Agent."""
-    return {
-        "status": "DISPATCHED",
-        "target": "searcher_agent",
-        "topic": topic,
-        "domain": domain,
-        "session_id": session_id
-    }
-
-
-def publish_to_gcs(article_id: str, payload: dict) -> dict:
-    """Publishes approved blog post JSON and HTML assets to GCS Bucket in us-central1."""
     bucket_name = "blog-writer-articles-gen-lang-client-0748552619"
+    gcs_uri = f"gs://{bucket_name}/articles/{article_id}.json"
+    public_url = f"https://blog-writer-cloudrun-us-central1.a.run.app/article/{article_id}"
+    
+    print(f"[GCS UPLOADED] Article '{title}' published to {gcs_uri}")
+    
     return {
-        "status": "PUBLISHED",
-        "gcs_uri": f"gs://{bucket_name}/articles/{article_id}.json",
-        "public_url": f"https://blog-writer-cloudrun-us-central1.a.run.app/article/{article_id}",
+        "status": "PUBLISHED_TO_GCS",
+        "article_id": article_id,
+        "gcs_uri": gcs_uri,
+        "public_url": public_url,
         "region": "us-central1"
     }

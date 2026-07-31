@@ -1,13 +1,17 @@
 """
 Tools for Science Writer Agent.
-Hero image generator and markdown formatting tools.
+Generates real renderable hero images and formats science articles.
 """
 
+from src.common.image_generator import generate_domain_hero_image
+
+
 def generate_science_hero_image(prompt: str) -> dict:
-    """Generates a high-quality hero image for science articles using Vertex Imagen 3."""
+    """Generates a high-quality hero image for science articles returning a renderable image URI."""
+    image_url = generate_domain_hero_image(prompt, "Science")
     return {
         "prompt": prompt,
-        "image_url": f"gs://blog-writer-assets/science_{hash(prompt) % 10000}.png",
+        "image_url": image_url,
         "status": "GENERATED"
     }
 

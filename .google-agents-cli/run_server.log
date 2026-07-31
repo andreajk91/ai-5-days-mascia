@@ -149,3 +149,47 @@ INFO:     Waiting for application shutdown.
 2026-07-31 08:57:04,361 - INFO - runners.py:2278 - Runner closed.
 INFO:     Application shutdown complete.
 INFO:     Finished server process [13868]
+=== Starting server at 2026-07-31T09:03:40.210979+00:00 ===
+Command: /home/admin_/ai-5-day/.venv/bin/adk api_server --host 127.0.0.1 --port 18080 --reload_agents --no-reload .
+CWD: /home/admin_/ai-5-day
+=== Started server process 15465 ===
+2026-07-31 09:03:42,685 - INFO - service_factory.py:266 - Using in-memory memory service
+2026-07-31 09:03:42,685 - INFO - local_storage.py:89 - Using per-agent session storage rooted at /home/admin_/ai-5-day
+2026-07-31 09:03:42,686 - INFO - local_storage.py:121 - Using per-agent artifact storage rooted at /home/admin_/ai-5-day
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/cli/fast_api.py:567: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+INFO:     Started server process [15465]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:18080 (Press CTRL+C to quit)
+INFO:     127.0.0.1:52064 - "GET / HTTP/1.1" 404 Not Found
+2026-07-31 09:03:43,258 - INFO - local_storage.py:65 - Creating local session service at /home/admin_/ai-5-day/app/.adk/session.db
+2026-07-31 09:03:43,270 - INFO - api_server.py:966 - New session created: 9bf30427-6a8f-4b4d-a149-b1909685794b
+INFO:     127.0.0.1:52080 - "POST /apps/app/users/cli-user/sessions HTTP/1.1" 200 OK
+2026-07-31 09:03:43,278 - INFO - envs.py:83 - Loaded .env file for app at /home/admin_/ai-5-day/.env
+INFO:     127.0.0.1:52090 - "POST /run_sse HTTP/1.1" 200 OK
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/tools/transfer_to_agent_tool.py:72: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  function_decl = super()._get_declaration()
+2026-07-31 09:03:43,447 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:03:45,590 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:03:45,707 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:03:48,854 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:03:48,978 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:03:51,078 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:03:51,196 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:03:53,822 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:03:53,925 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:03:56,449 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:03:56,588 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:04:02,553 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:04:02,684 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:04:07,889 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:04:08,070 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:04:24,613 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:04:24,744 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:04:27,096 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:04:27,222 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 09:04:41,862 - INFO - google_llm.py:287 - Response received from the model.
+2026-07-31 09:04:41,991 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False

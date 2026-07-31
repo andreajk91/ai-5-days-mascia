@@ -1,13 +1,17 @@
 """
 Tools for Economics Writer Agent.
-Hero image generator and markdown formatting tools.
+Generates real renderable hero images and formats economic articles.
 """
 
+from src.common.image_generator import generate_domain_hero_image
+
+
 def generate_economics_hero_image(prompt: str) -> dict:
-    """Generates a high-quality hero image for economics articles using Vertex Imagen 3."""
+    """Generates a high-quality hero image for economics articles returning a renderable image URI."""
+    image_url = generate_domain_hero_image(prompt, "Economics")
     return {
         "prompt": prompt,
-        "image_url": f"gs://blog-writer-assets/economics_{hash(prompt) % 10000}.png",
+        "image_url": image_url,
         "status": "GENERATED"
     }
 

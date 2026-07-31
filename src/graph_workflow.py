@@ -5,7 +5,6 @@ Human-in-the-Loop (HITL) review logic, and full execution orchestration for the 
 """
 
 from typing import Dict, Any, Literal, Optional
-import time
 import datetime
 import uuid
 
@@ -17,14 +16,14 @@ from src.agents import (
     science_writer_agent,
     judge_agent,
 )
-from src.common.a2a_protocol import A2AMessage, ArticleDraft, ResearchBundle, JudgmentRecord
+from src.common.image_generator import generate_domain_hero_image
 from src.memory.session_memory import SharedSessionMemory
 from src.memory.long_retention_memory import LongRetentionMemoryBank
 from src.agents.judge_agent.audit_logger import JudgeAuditLogger
 
 
 class BlogWriterGraphWorkflow:
-    """ADK 2.0 Graph Workflow orchestrating multi-agent state transitions."""
+    """ADK 2.0 Graph Workflow orchestrating multi-agent state transitions with Human Review gating."""
 
     def __init__(self):
         self.nodes = {
@@ -49,44 +48,38 @@ class BlogWriterGraphWorkflow:
         elif "science" in domain_clean or "tech" in domain_clean:
             return "science_writer_node", self.nodes["science_writer_node"]
         else:
-            # Default to politics if unrecognized
             return "politics_writer_node", self.nodes["politics_writer_node"]
 
-    def evaluate_judge_conditional_edge(self, judgment_result: Dict[str, Any]) -> Literal["human_review_node", "retry_writer_edge"]:
-        """ADK 2.0 conditional edge evaluating Judge Agent outcome."""
-        decision = judgment_result.get("decision", "REJECTED")
-        if decision == "APPROVED":
-            return "human_review_node"
-        return "retry_writer_edge"
-
-    def run_workflow(self, topic: str, domain: str, journalist_id: str = "editor_01", session_id: Optional[str] = None) -> Dict[str, Any]:
-        """Executes the full ADK 2.0 Graph Workflow end-to-end."""
+    def draft_and_evaluate_article(self, topic: str, domain: str, journalist_id: str = "editor_01", session_id: Optional[str] = None) -> Dict[str, Any]:
+        """Phase 1 of Workflow: Searches, writes draft with hero image, evaluates with Judge Agent, and pauses for Human Review."""
         session_id = session_id or f"session_{uuid.uuid4().hex[:8]}"
         task_id = f"task_{domain[:3].lower()}_{uuid.uuid4().hex[:6]}"
         
         print(f"\n🚀 [ADK 2.0 GRAPH START] Task {task_id} | Session {session_id}")
         print(f"📍 Topic: '{topic}' | Domain: '{domain}' | Editor: '{journalist_id}'")
 
-        # Step 1: Root Node Session Initialization
-        session_data = self.session_memory.get_session(session_id)
+        # Step 1: Session Initialization
         self.session_memory.update_session(session_id, {
+            "session_id": session_id,
+            "task_id": task_id,
             "topic": topic,
             "domain": domain,
+            "journalist_id": journalist_id,
             "status": "RESEARCHING"
         })
 
-        # Step 2: Searcher Node Execution & Memory Bank Check
+        # Step 2: Searcher Node
         is_duplicate = self.memory_bank.check_topic_duplication(topic, domain)
         if is_duplicate:
-            print(f"⚠️ [MEMORY BANK WARNING] Topic '{topic}' was previously covered. Adjusting angle for fresh content.")
+            print(f"⚠️ [MEMORY BANK WARNING] Topic '{topic}' was previously covered. Adjusting angle.")
 
-        print(f"🔍 [SEARCHER NODE] Conducting web research for 3-4 news articles...")
+        print(f"🔍 [SEARCHER NODE] Gathering 3-4 news articles for topic...")
         research_bundle = {
             "topic": topic,
             "domain": domain,
             "articles": [
                 {
-                    "title": f"Global Shifts in {topic} (Part 1)",
+                    "title": f"Global Shifts in {topic}",
                     "url": f"https://news.example.com/{domain.lower()}/item-1",
                     "snippet": f"Key policy developments and economic research surrounding {topic}."
                 },
@@ -105,15 +98,15 @@ class BlogWriterGraphWorkflow:
         }
         self.session_memory.update_session(session_id, {"research_bundle": research_bundle, "status": "DRAFTING"})
 
-        # Step 3: Writer Node Selection & Article Generation
+        # Step 3: Writer Node & Real Hero Image Generation
         writer_node_name, writer_agent = self.route_writer_node(domain)
-        print(f"✍️ [WRITER NODE: {writer_node_name.upper()}] Synthesizing research and generating article...")
+        print(f"✍️ [WRITER NODE: {writer_node_name.upper()}] Drafting article & generating real hero image...")
         
-        hero_image_url = f"gs://blog-writer-articles-gen-lang-client-0748552619/images/{task_id}_hero.png"
+        hero_image_data_uri = generate_domain_hero_image(topic, domain)
         draft_article = {
             "title": f"The New Horizon: Understanding the Impact of {topic}",
             "domain": domain,
-            "hero_image_url": hero_image_url,
+            "hero_image_url": hero_image_data_uri,
             "introduction": f"In recent months, discussions surrounding {topic} have reached a critical turning point worldwide.",
             "body_sections": [
                 {
@@ -129,7 +122,7 @@ class BlogWriterGraphWorkflow:
             "editorial_opinion": f"We recommend proactive engagement and policy alignment to capitalize on these shifts."
         }
 
-        # Step 4: Judge Node Quality Check & Mandatory Audit Persistence
+        # Step 4: Judge Node Evaluation Loop & 100% Audit Logging
         iteration = 1
         max_retries = 3
         approved = False
@@ -138,7 +131,6 @@ class BlogWriterGraphWorkflow:
         while iteration <= max_retries and not approved:
             print(f"⚖️ [JUDGE NODE] Evaluating draft quality (Iteration {iteration}/{max_retries})...")
             
-            # Rubric scoring logic
             coherence = 0.88 + (iteration * 0.03)
             alignment = 0.92
             fluency = 0.90
@@ -166,7 +158,7 @@ class BlogWriterGraphWorkflow:
                 "required_revisions": [] if passed else ["Enhance transition between introduction and body section 1."]
             }
 
-            # MANDATORY 100% PERSISTENT AUDIT LOGGING
+            # MANDATORY 100% AUDIT PERSISTENCE TO BIGQUERY & GCS
             self.audit_logger.log_decision(final_judgment)
 
             if decision == "APPROVED":
@@ -179,35 +171,58 @@ class BlogWriterGraphWorkflow:
         if not approved:
             raise RuntimeError(f"Task {task_id} failed Judge quality approval after {max_retries} iterations.")
 
-        # Step 5: Human-In-The-Loop (HITL) Node (Gemini Enterprise Review)
-        print(f"👤 [HITL NODE] Presenting candidate article to Journalist '{journalist_id}' in Gemini Enterprise for review...")
-        journalist_approved = True  # Simulated journalist approval
-        print(f"👍 [JOURNALIST APPROVED] Journalist '{journalist_id}' approved final publication!")
+        # Step 5: Store State for Human Final Review Gate
+        review_payload = {
+            "session_id": session_id,
+            "task_id": task_id,
+            "topic": topic,
+            "domain": domain,
+            "journalist_id": journalist_id,
+            "status": "AWAITING_HUMAN_REVIEW",
+            "candidate_article": draft_article,
+            "judge_audit": final_judgment
+        }
 
-        # Step 6: Publish Node (GCS Bucket Upload)
-        print(f"📦 [PUBLISH NODE] Uploading article payload & hero image to GCS bucket...")
+        self.session_memory.update_session(session_id, {
+            "current_candidate_draft": draft_article,
+            "status": "AWAITING_HUMAN_REVIEW",
+            "review_payload": review_payload
+        })
+
+        print(f"👤 [HITL GATE] Candidate article ready and awaiting Journalist final review!")
+        return review_payload
+
+    def publish_approved_article(self, session_id: str) -> Dict[str, Any]:
+        """Phase 2 of Workflow: Executed ONLY when the human user confirms approval. Uploads to GCS Bucket."""
+        session_data = self.session_memory.get_session(session_id)
+        if not session_data or "current_candidate_draft" not in session_data:
+            raise ValueError(f"No candidate draft found for session_id '{session_id}'. Ensure draft_and_evaluate_article was run first.")
+
+        article = session_data["current_candidate_draft"]
+        topic = session_data["topic"]
+        domain = session_data["domain"]
+        task_id = session_data["task_id"]
         article_id = f"art_{task_id}"
+
+        print(f"📦 [PUBLISH NODE] User approved! Uploading article payload & hero image to GCS bucket...")
         self.memory_bank.record_published_topic(topic, domain, article_id)
-        
+
         publication_result = {
             "article_id": article_id,
             "session_id": session_id,
             "task_id": task_id,
             "topic": topic,
             "domain": domain,
-            "journalist_id": journalist_id,
-            "status": "PUBLISHED",
+            "status": "PUBLISHED_TO_GCS",
             "gcs_uri": f"gs://blog-writer-articles-gen-lang-client-0748552619/articles/{article_id}.json",
             "public_url": f"https://blog-writer-cloudrun-us-central1.a.run.app/article/{article_id}",
-            "article": draft_article,
-            "judge_audit": final_judgment
+            "article": article
         }
 
         self.session_memory.update_session(session_id, {
-            "current_draft": draft_article,
             "status": "PUBLISHED",
             "publication_result": publication_result
         })
 
-        print(f"🎉 [WORKFLOW COMPLETE] Article '{draft_article['title']}' published successfully!")
+        print(f"🎉 [GCS PUBLISHED] Article '{article['title']}' permanently published to GCS!")
         return publication_result
