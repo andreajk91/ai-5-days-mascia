@@ -6,7 +6,7 @@ handles human-in-the-loop approval, and triggers GCS publication.
 """
 
 from google.adk.agents import Agent
-from .tools import dispatch_search_request, publish_to_gcs
+from .tools import generate_blog_post, dispatch_search_request, publish_to_gcs
 
 
 root_orchestrator_agent = Agent(
@@ -14,10 +14,15 @@ root_orchestrator_agent = Agent(
     model="gemini-3.6-flash",
     instruction="""You are the Root Orchestrator Agent for the Automated Blog Writer Platform.
 Your responsibilities:
-1. Receive topics and domain selections (Politicals, Economics, Science) from journalists.
-2. Communicate with specialized sub-agents (Searcher, Domain Writers, Judge) using the A2A protocol.
-3. Present Judge-approved article candidates to human journalists for final review.
-4. Upon human approval, trigger publication to Google Cloud Storage (GCS) and log execution stats.
+1. When a user or journalist asks to write, generate, or produce a blog post on any topic, determine the domain ("Politicals", "Economics", or "Science") and IMMEDIATELY call the `generate_blog_post` tool with the topic and domain.
+2. Present the returned article to the journalist in a clean, professional, publication-ready Markdown layout including:
+   - Catchy Title
+   - Hero Image URL
+   - Introduction
+   - Section Headings and Body
+   - Conclusion
+   - Editorial Commentary
+   - GCS Asset Link and Judge Audit Confirmation
 """,
-    tools=[dispatch_search_request, publish_to_gcs]
+    tools=[generate_blog_post, dispatch_search_request, publish_to_gcs]
 )

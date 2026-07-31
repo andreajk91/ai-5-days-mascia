@@ -1,8 +1,21 @@
 """
 Tools for Root Orchestrator Agent.
-Includes A2A dispatchers and GCS publication utilities.
+Includes A2A dispatchers, workflow orchestrator, and GCS publication utilities.
 GCP Infrastructure Location: us-central1
 """
+
+def generate_blog_post(topic: str, domain: str) -> dict:
+    """Triggers the ADK 2.0 Multi-Agent Graph Workflow to search, write, judge, and publish a blog post.
+    
+    Args:
+        topic: The topic/subject of the blog post requested by the journalist.
+        domain: One of 'Politicals', 'Economics', or 'Science'.
+    """
+    from src.graph_workflow import BlogWriterGraphWorkflow
+    workflow = BlogWriterGraphWorkflow()
+    result = workflow.run_workflow(topic=topic, domain=domain, journalist_id="playground_user")
+    return result
+
 
 def dispatch_search_request(topic: str, domain: str, session_id: str) -> dict:
     """A2A tool to dispatch research requests to the Searcher Agent."""

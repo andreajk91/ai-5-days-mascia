@@ -1,7 +1,7 @@
 """
-App package for agents-cli playground.
+App package for agents-cli playground and ADK.
 """
 
-from .agent import agent
+from .agent import root_agent, agent, app
 
-__all__ = ["agent"]
+__all__ = ["root_agent", "agent", "app"]
