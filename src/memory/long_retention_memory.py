@@ -2,15 +2,16 @@
 Long Retention Memory Bank Client.
 Stores long-term contextual memory across sessions including editorial style preferences,
 historical topic coverage to prevent duplication, and Judge feedback patterns.
+GCP Infrastructure Location: us-central1
 """
 
 from typing import Dict, Any, List, Optional
 
 
 class LongRetentionMemoryBank:
-    """ADK Memory Bank interface for long-term agent persistence."""
+    """ADK Memory Bank interface for long-term agent persistence in us-central1."""
 
-    def __init__(self, storage_path: str = "gs://blog-writer-memory-bank"):
+    def __init__(self, storage_path: str = "gs://blog-writer-memory-gen-lang-client-0748552619"):
         self.storage_path = storage_path
         self._editorial_preferences: Dict[str, Any] = {
             "tone": "Authoritative yet accessible journalism",
@@ -34,5 +35,5 @@ class LongRetentionMemoryBank:
             "article_id": article_id
         })
 
-    def get_editorial_preferences((self) -> Dict[str, Any]:
+    def get_editorial_preferences(self) -> Dict[str, Any]:
         return self._editorial_preferences
