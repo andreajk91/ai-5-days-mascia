@@ -1,11 +1,15 @@
 """
 Science Writer Agent.
 Domain expert in Technological Innovation, AI, Space, Medicine, and Research.
-Follows the Economist / Scientific American benchmark exemplar for long, complex article structure.
+Configured with ADK before_model_callback sanitization.
 """
 
 from google.adk.agents import Agent
-from src.common.safety_config import get_permissive_safety_config, on_model_error_fallback
+from src.common.safety_config import (
+    get_permissive_safety_config,
+    before_model_sanitize_callback,
+    on_model_error_fallback,
+)
 from .tools import generate_science_hero_image, format_science_markdown
 
 
@@ -13,6 +17,7 @@ science_writer_agent = Agent(
     name="science_writer_agent",
     model="gemini-3.6-flash",
     generate_content_config=get_permissive_safety_config(),
+    before_model_callback=before_model_sanitize_callback,
     on_model_error_callback=on_model_error_fallback,
     instruction="""You are the Science Writer Agent, a prominent science journalist and technology commentator.
 

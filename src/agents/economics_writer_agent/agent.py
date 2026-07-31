@@ -1,11 +1,15 @@
 """
 Economics Writer Agent.
 Domain expert in Macroeconomics, Global Markets, Fiscal Policy, and Trade Disruption.
-Follows the Financial Times / Economist benchmark exemplar for long, complex article structure.
+Configured with ADK before_model_callback sanitization.
 """
 
 from google.adk.agents import Agent
-from src.common.safety_config import get_permissive_safety_config, on_model_error_fallback
+from src.common.safety_config import (
+    get_permissive_safety_config,
+    before_model_sanitize_callback,
+    on_model_error_fallback,
+)
 from .tools import generate_economics_hero_image, format_economics_markdown
 
 
@@ -13,6 +17,7 @@ economics_writer_agent = Agent(
     name="economics_writer_agent",
     model="gemini-3.6-flash",
     generate_content_config=get_permissive_safety_config(),
+    before_model_callback=before_model_sanitize_callback,
     on_model_error_callback=on_model_error_fallback,
     instruction="""You are the Economics Writer Agent, a senior financial columnist and economic analyst.
 

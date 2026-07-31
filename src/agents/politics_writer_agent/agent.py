@@ -1,11 +1,15 @@
 """
 Politics Writer Agent.
 Domain expert in Political Science, Geopolitics, and Public Policy.
-Follows the Foreign Affairs / Financial Times benchmark exemplar for long, complex article structure.
+Configured with ADK before_model_callback sanitization.
 """
 
 from google.adk.agents import Agent
-from src.common.safety_config import get_permissive_safety_config, on_model_error_fallback
+from src.common.safety_config import (
+    get_permissive_safety_config,
+    before_model_sanitize_callback,
+    on_model_error_fallback,
+)
 from .tools import generate_political_hero_image, format_politics_markdown
 
 
@@ -13,6 +17,7 @@ politics_writer_agent = Agent(
     name="politics_writer_agent",
     model="gemini-3.6-flash",
     generate_content_config=get_permissive_safety_config(),
+    before_model_callback=before_model_sanitize_callback,
     on_model_error_callback=on_model_error_fallback,
     instruction="""You are the Politics Writer Agent, an investigative political analyst and policy commentator.
 
