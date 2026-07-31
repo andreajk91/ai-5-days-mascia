@@ -2,7 +2,7 @@
 Root Orchestrator Agent.
 Serves as the primary entry point registered with Gemini Enterprise.
 Orchestrates multi-agent production across Searcher, Writer, Image Generator, and Judge sub-agents,
-displaying clear phase declarations, long Financial Times benchmark structure, and detailed Judge considerations.
+displaying clear phase declarations, long Financial Times benchmark structure, and detailed Judge considerations (including image evaluation).
 """
 
 from google.adk.agents import Agent
@@ -39,7 +39,7 @@ Your primary duty is to orchestrate and display the complete multi-agent workflo
    - **Step 1 (Searcher)**: Delegate web research and topic deduplication to `searcher_agent`.
    - **Step 2 (SME Writer)**: Delegate article drafting to specialized SME Writer (`politics_writer_agent`, `economics_writer_agent`, or `science_writer_agent`) following the Financial Times / Foreign Affairs / Nature benchmark exemplar.
    - **Step 3 (Image Generator)**: Delegate hero image creation to `image_generator_agent` to construct a bespoke, topic-tailored hero image Data URI.
-   - **Step 4 (Judge)**: Delegate quality rubric evaluation, detailed qualitative considerations, and persistent BigQuery/GCS audit logging to `judge_agent`.
+   - **Step 4 (Judge)**: Delegate quality rubric evaluation (text AND hero image design/relevance), detailed qualitative considerations, and persistent BigQuery/GCS audit logging to `judge_agent`.
    - **Step 5 (Human Review)**: Present the approved candidate article to the Journalist for final review.
 
 3. **Required User Presentation Format**:
@@ -50,7 +50,7 @@ Your primary duty is to orchestrate and display the complete multi-agent workflo
    * **🔍 [PHASE 1: RESEARCH]**: Web discovery & topic deduplication completed by Searcher Agent.
    * **✍️ [PHASE 2A: DRAFTING]**: Financial Times / Foreign Affairs / Nature benchmark article constructed by Writer Agent.
    * **🎨 [PHASE 2B: VISUAL DESIGN]**: Bespoke, topic-tailored hero image created by Image Generator Agent.
-   * **⚖️ [PHASE 3: EVALUATION]**: Quality rubric evaluation & 100% BigQuery/GCS persistent audit logged by Judge Agent.
+   * **⚖️ [PHASE 3: EVALUATION]**: Comprehensive text & hero image rubric evaluation & 100% BigQuery/GCS persistent audit logged by Judge Agent.
    * **👤 [PHASE 4: HUMAN REVIEW]**: Candidate draft ready for Journalist final review.
 
    ---
@@ -80,7 +80,8 @@ Your primary duty is to orchestrate and display the complete multi-agent workflo
    ---
    ### ⚖️ JUDGE AGENT EVALUATION & CONSIDERATIONS
    * **Decision**: APPROVED
-   * **Rubric Scores**: Coherence: [coherence_score], Alignment: [alignment_score], Fluency: [fluency_score]
+   * **Text Rubric Scores**: Coherence: [coherence_score], Alignment: [alignment_score], Fluency: [fluency_score]
+   * **Hero Image Rubric Scores**: Image Relevance: [image_relevance_score], Image Design Quality: [image_quality_score]
    * **Detailed Judge Considerations (Why Approved)**:
      [Insert detailed_considerations from judge_audit]
    * **Persistent Audit**: Saved to BigQuery (`blog_system_audit.judge_decisions_v1`) and Cloud Storage in us-central1.
