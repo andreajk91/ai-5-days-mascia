@@ -125,6 +125,7 @@ with tab4:
     if submit_test:
         with st.spinner("Executing ADK 2.0 Graph Workflow across Searcher, Writer, and Judge nodes..."):
             workflow = BlogWriterGraphWorkflow()
-            result = workflow.run_workflow(topic=test_topic, domain=test_domain, journalist_id="dashboard_tester")
-            st.success(f"Article Published! ID: {result['article_id']}")
+            result = workflow.draft_and_evaluate_article(topic=test_topic, domain=test_domain, journalist_id="dashboard_tester")
+            st.success(f"Candidate Draft Ready! Task ID: {result['task_id']}")
             st.json(result)
+

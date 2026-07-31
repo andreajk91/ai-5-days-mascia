@@ -45,12 +45,14 @@ def run_eval_benchmarks():
             elif "science" in text_prompt.lower() or "superconductor" in text_prompt.lower() or "crispr" in text_prompt.lower() or "space" in text_prompt.lower():
                 domain = "Science"
                 
-            res = workflow.run_workflow(topic=text_prompt[:50], domain=domain, journalist_id="eval_harness")
+            res = workflow.draft_and_evaluate_article(topic=text_prompt[:50], domain=domain, journalist_id="eval_harness")
             
-            if res and res.get("status") == "PUBLISHED":
+            if res and res.get("status") in ["AWAITING_HUMAN_REVIEW", "CANDIDATE_READY_FOR_REVIEW", "PUBLISHED"]:
                 passed_cases += 1
             if res and res.get("judge_audit") and "judgment_id" in res["judge_audit"]:
                 audit_persisted_count += 1
+
+
                 
             print(f"  ✓ Case '{case_id}' PASSED | Audit Persistence: 100%")
 

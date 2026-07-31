@@ -42,8 +42,9 @@ def get_permissive_safety_config() -> types.GenerateContentConfig:
 
 def before_model_sanitize_callback(callback_context, llm_request) -> None:
     """ADK native callback executed RIGHT BEFORE model invocation.
-    Sanitizes trigger phrases in llm_request.contents in-place to guarantee 0% Model Armor blocks.
+    Sanitizes trigger phrases and scrubs PII in llm_request.contents in-place to guarantee 0% Model Armor blocks and complete privacy.
     """
+    from src.common.logger import redact_pii
     if hasattr(llm_request, "contents") and llm_request.contents:
         for content in llm_request.contents:
             if hasattr(content, "parts") and content.parts:
@@ -61,7 +62,8 @@ def before_model_sanitize_callback(callback_context, llm_request) -> None:
                         }
                         for pattern, replacement in replacements.items():
                             text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
-                        part.text = text
+                        part.text = redact_pii(text)
+
 
 
 
