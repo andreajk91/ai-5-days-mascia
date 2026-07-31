@@ -1,0 +1,25 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "e2e_politics_flow",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Topic: Global Geopolitical Trade Alliances | Domain: Politicals"}]
+      }
+    },
+    {
+      "eval_case_id": "e2e_economics_flow",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Topic: Digital Currency Adoption in Emerging Markets | Domain: Economics"}]
+      }
+    },
+    {
+      "eval_case_id": "e2e_science_flow",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Topic: CRISPR Gene Editing Advances in Oncology | Domain: Science"}]
+      }
+    }
+  ]
+}

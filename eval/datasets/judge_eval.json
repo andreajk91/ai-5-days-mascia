@@ -1,0 +1,11 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "judge_review_01",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Evaluate candidate article draft for coherence, sentence fluency, and topic relevance. Verify 100% persistent logging in BigQuery and GCS."}]
+      }
+    }
+  ]
+}

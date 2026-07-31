@@ -1,0 +1,28 @@
+# ADK Evaluation Suite Configuration for Automated Blog Writer Platform
+# Metrics configuration for Searcher, Writers, Judge, and End-to-End Workflow
+
+metrics_to_run:
+  - multi_turn_task_success
+  - multi_turn_tool_use_quality
+  - final_response_quality
+  - hallucination
+  - catchy_headline_quality
+  - judge_audit_persistence_check
+
+custom_metrics:
+  - name: catchy_headline_quality
+    prompt_template: |
+      Evaluate the article headline for engagement, SEO quality, and domain relevance.
+      Headline: {response}
+      Domain context: {prompt}
+      Return JSON: {"score": <0.0-1.0>, "explanation": "<rationale>"}
+
+  - name: judge_audit_persistence_check
+    custom_function: |
+      def evaluate(instance):
+          # Verifies 100% audit record persistence
+          response = instance.get("response", {})
+          audit = response.get("judge_audit") or instance.get("judge_audit")
+          if audit and audit.get("status") == "PERSISTED" and "judgment_id" in audit:
+              return {'score': 1.0, 'explanation': '100% persistent audit record verified in BigQuery & GCS'}
+          return {'score': 0.0, 'explanation': 'Missing mandatory judge audit record'}

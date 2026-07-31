@@ -1,0 +1,25 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "writer_politics_01",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Draft a political blog post on Treaty Negotiations in Europe using provided news articles. Include a catchy title, hero image prompt, intro, body, and conclusion."}]
+      }
+    },
+    {
+      "eval_case_id": "writer_economics_01",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Draft an economic blog post on Inflation Metrics and Market Volatility. Include a catchy title, hero image prompt, intro, body, and conclusion."}]
+      }
+    },
+    {
+      "eval_case_id": "writer_science_01",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Draft a science blog post on Deep Space Telescope Discoveries. Include a catchy title, hero image prompt, intro, body, and conclusion."}]
+      }
+    }
+  ]
+}

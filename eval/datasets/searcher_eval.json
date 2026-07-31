@@ -1,0 +1,25 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "searcher_politics_01",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Find 3-4 news articles on Global Renewable Energy Agreements 2026 for Politicals"}]
+      }
+    },
+    {
+      "eval_case_id": "searcher_economics_01",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Find 3-4 news articles on Central Bank Interest Rate Policy Shift for Economics"}]
+      }
+    },
+    {
+      "eval_case_id": "searcher_science_01",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Find 3-4 news articles on Next-Generation Superconductor Innovations for Science"}]
+      }
+    }
+  ]
+}
