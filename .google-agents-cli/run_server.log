@@ -708,3 +708,93 @@ INFO:     Waiting for application shutdown.
 2026-07-31 10:49:58,068 - INFO - runners.py:2278 - Runner closed.
 INFO:     Application shutdown complete.
 INFO:     Finished server process [29684]
+=== Starting server at 2026-07-31T11:08:53.411714+00:00 ===
+Command: /home/admin_/ai-5-day/.venv/bin/adk api_server --host 127.0.0.1 --port 18080 --reload_agents --no-reload .
+CWD: /home/admin_/ai-5-day
+=== Started server process 31259 ===
+2026-07-31 11:08:55,921 - INFO - service_factory.py:266 - Using in-memory memory service
+2026-07-31 11:08:55,921 - INFO - local_storage.py:89 - Using per-agent session storage rooted at /home/admin_/ai-5-day
+2026-07-31 11:08:55,922 - INFO - local_storage.py:121 - Using per-agent artifact storage rooted at /home/admin_/ai-5-day
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/cli/fast_api.py:567: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+INFO:     Started server process [31259]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:18080 (Press CTRL+C to quit)
+INFO:     127.0.0.1:44768 - "GET / HTTP/1.1" 404 Not Found
+2026-07-31 11:08:56,475 - INFO - local_storage.py:65 - Creating local session service at /home/admin_/ai-5-day/app/.adk/session.db
+2026-07-31 11:08:56,491 - INFO - api_server.py:966 - New session created: 9213fdfc-d13f-4aed-9ba7-1760de587cc6
+INFO:     127.0.0.1:44784 - "POST /apps/app/users/cli-user/sessions HTTP/1.1" 200 OK
+2026-07-31 11:08:56,499 - INFO - envs.py:83 - Loaded .env file for app at /home/admin_/ai-5-day/.env
+INFO:     127.0.0.1:44800 - "POST /run_sse HTTP/1.1" 404 Not Found
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31259]
+=== Starting server at 2026-07-31T11:09:18.634795+00:00 ===
+Command: /home/admin_/ai-5-day/.venv/bin/adk api_server --host 127.0.0.1 --port 18080 --reload_agents --no-reload .
+CWD: /home/admin_/ai-5-day
+=== Started server process 31420 ===
+2026-07-31 11:09:21,169 - INFO - service_factory.py:266 - Using in-memory memory service
+2026-07-31 11:09:21,170 - INFO - local_storage.py:89 - Using per-agent session storage rooted at /home/admin_/ai-5-day
+2026-07-31 11:09:21,170 - INFO - local_storage.py:121 - Using per-agent artifact storage rooted at /home/admin_/ai-5-day
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/cli/fast_api.py:567: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+INFO:     Started server process [31420]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:18080 (Press CTRL+C to quit)
+INFO:     127.0.0.1:34068 - "GET / HTTP/1.1" 404 Not Found
+2026-07-31 11:09:21,686 - INFO - local_storage.py:65 - Creating local session service at /home/admin_/ai-5-day/app/.adk/session.db
+2026-07-31 11:09:21,701 - INFO - api_server.py:966 - New session created: 899958c0-e2fb-4d12-a845-3d320d308e5b
+INFO:     127.0.0.1:34084 - "POST /apps/app/users/cli-user/sessions HTTP/1.1" 200 OK
+2026-07-31 11:09:21,708 - INFO - envs.py:83 - Loaded .env file for app at /home/admin_/ai-5-day/.env
+INFO:     127.0.0.1:34090 - "POST /run_sse HTTP/1.1" 404 Not Found
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31420]
+=== Starting server at 2026-07-31T11:10:21.870511+00:00 ===
+Command: /home/admin_/ai-5-day/.venv/bin/adk api_server --host 127.0.0.1 --port 18080 --reload_agents --no-reload .
+CWD: /home/admin_/ai-5-day
+=== Started server process 31716 ===
+2026-07-31 11:10:24,294 - INFO - service_factory.py:266 - Using in-memory memory service
+2026-07-31 11:10:24,294 - INFO - local_storage.py:89 - Using per-agent session storage rooted at /home/admin_/ai-5-day
+2026-07-31 11:10:24,295 - INFO - local_storage.py:121 - Using per-agent artifact storage rooted at /home/admin_/ai-5-day
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/cli/fast_api.py:567: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+INFO:     Started server process [31716]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:18080 (Press CTRL+C to quit)
+INFO:     127.0.0.1:58978 - "GET / HTTP/1.1" 404 Not Found
+2026-07-31 11:10:24,921 - INFO - local_storage.py:65 - Creating local session service at /home/admin_/ai-5-day/app/.adk/session.db
+2026-07-31 11:10:24,939 - INFO - api_server.py:966 - New session created: d9521f06-99d8-4d36-8e35-4ae86054a55a
+INFO:     127.0.0.1:58980 - "POST /apps/app/users/cli-user/sessions HTTP/1.1" 200 OK
+2026-07-31 11:10:24,949 - INFO - envs.py:83 - Loaded .env file for app at /home/admin_/ai-5-day/.env
+INFO:     127.0.0.1:58984 - "POST /run_sse HTTP/1.1" 200 OK
+/home/admin_/ai-5-day/.venv/lib/python3.12/site-packages/google/adk/tools/transfer_to_agent_tool.py:72: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  function_decl = super()._get_declaration()
+2026-07-31 11:10:25,265 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 11:10:27,510 - INFO - google_llm.py:287 - Response received from the model.
+📡 [HAND-OFF] The sub-agent searcher_agent has finished their work and now I send the task 'Drafting Article' to the sub-agent economics_writer_agent.
+📡 [HAND-OFF] The sub-agent economics_writer_agent has finished their work and now I send the task 'Generating Hero Image' to the sub-agent image_generator_agent.
+☁️ [GCS UPLOAD SUCCESS] Hero image uploaded to gs://blog-writer-articles-gen-lang-client-0748552619/images/task_eco_b2750d_hero.svg | Public URL: https://storage.googleapis.com/blog-writer-articles-gen-lang-client-0748552619/images/task_eco_b2750d_hero.svg
+📡 [HAND-OFF] The sub-agent image_generator_agent has finished their work and now I send the task 'Quality Evaluation' to the sub-agent judge_agent.
+[AUDIT LOGGED] Judgment judge_rec_task_eco_b2750d_iter1 saved to BigQuery table 'gen-lang-client-0748552619.blog_system_audit.judge_decisions_v1'
+[GCS ARCHIVED] Judgment judge_rec_task_eco_b2750d_iter1 saved to 'gs://blog-writer-audit-gen-lang-client-0748552619/judge-logs/judge_rec_task_eco_b2750d_iter1.json'
+📡 [HAND-OFF] The sub-agent judge_agent has finished their work and now I present the candidate article to the user for final review.
+2026-07-31 11:10:29,386 - INFO - google_llm.py:217 - Sending out request, model: gemini-3.6-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2026-07-31 11:10:40,928 - INFO - google_llm.py:287 - Response received from the model.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-07-31 11:10:41,143 - INFO - runners.py:2265 - Closing runner...
+2026-07-31 11:10:41,145 - INFO - runners.py:2278 - Runner closed.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31716]

@@ -1,7 +1,7 @@
 """
 Root Orchestrator Agent.
 Serves as the primary entry point registered with Gemini Enterprise.
-Orchestrates multi-agent production across Searcher, Writer, Image Generator, and Judge sub-agents,
+Orchestrates multi-agent production natively across Searcher, Writer, Image Generator, and Judge sub-agents,
 displaying explicit sub-agent hand-off notifications, GCS public image URLs, Financial Times benchmark structure, and detailed Judge considerations.
 """
 
@@ -15,9 +15,8 @@ from src.agents.image_generator_agent import image_generator_agent
 from src.common.safety_config import (
     get_permissive_safety_config,
     before_model_sanitize_callback,
-    on_model_error_fallback,
 )
-from .tools import draft_blog_post, publish_blog_post, a2a_send_message, publish_to_gcs
+from .tools import draft_blog_post, publish_blog_post, publish_to_gcs
 
 
 root_orchestrator_agent = Agent(
@@ -25,7 +24,6 @@ root_orchestrator_agent = Agent(
     model="gemini-3.6-flash",
     generate_content_config=get_permissive_safety_config(),
     before_model_callback=before_model_sanitize_callback,
-    on_model_error_callback=on_model_error_fallback,
     instruction="""You are the Root Orchestrator Agent for the Automated Blog Writer Platform.
 
 Your primary duty is to orchestrate and display the complete multi-agent workflow whenever a user requests an article:
@@ -98,5 +96,5 @@ Your primary duty is to orchestrate and display the complete multi-agent workflo
         judge_agent,
         image_generator_agent,
     ],
-    tools=[draft_blog_post, publish_blog_post, a2a_send_message, publish_to_gcs]
+    tools=[draft_blog_post, publish_blog_post, publish_to_gcs]
 )

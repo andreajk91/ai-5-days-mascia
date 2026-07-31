@@ -6,7 +6,7 @@ GCP Infrastructure Location: us-central1
 
 def draft_blog_post(topic: str, domain: str) -> dict:
     """Drafts a blog post by executing the full ADK 2.0 Graph Workflow across Searcher,
-    Domain Writer, and Judge Agent nodes. Returns the candidate draft for Human Final Review BEFORE publishing.
+    Domain Writer, Image Generator, and Judge Agent sub-agents.
     
     Args:
         topic: The topic requested by the journalist.
@@ -30,39 +30,6 @@ def publish_blog_post(session_id: str) -> dict:
     return result
 
 
-def a2a_send_message(recipient_agent: str, payload_type: str, body: dict, session_id: str = "session_001") -> dict:
-    """Sends an Agent-to-Agent (A2A) protocol message payload to a target specialized sub-agent.
-    
-    Args:
-        recipient_agent: Target agent ('searcher_agent', 'politics_writer_agent', 'economics_writer_agent', 'science_writer_agent', 'judge_agent').
-        payload_type: Type of payload ('research_request', 'article_draft', 'judge_eval_request').
-        body: The JSON payload dictionary.
-        session_id: Active session ID.
-    """
-    from src.common.a2a_protocol import A2AMessage
-    
-    msg = A2AMessage(
-        sender="root_orchestrator_agent",
-        recipient=recipient_agent,
-        task_id=f"task_{recipient_agent[:3]}_a2a",
-        session_id=session_id,
-        payload_type=payload_type,
-        body=body
-    )
-    
-    print(f"📡 [A2A DISPATCH] Sender: root_orchestrator_agent -> Recipient: {recipient_agent} | Type: {payload_type}")
-    
-    return {
-        "protocol": "A2A/1.0",
-        "status": "DELIVERED",
-        "sender": "root_orchestrator_agent",
-        "recipient": recipient_agent,
-        "payload_type": payload_type,
-        "message_payload": msg.model_dump(),
-        "timestamp": msg.timestamp
-    }
-
-
 def publish_to_gcs(article_id: str, title: str, domain: str, hero_image_url: str, content: str, editorial_opinion: str) -> dict:
     """Publishes approved blog post JSON and HTML assets to GCS Bucket in us-central1 after human journalist review.
     
@@ -76,7 +43,7 @@ def publish_to_gcs(article_id: str, title: str, domain: str, hero_image_url: str
     """
     bucket_name = "blog-writer-articles-gen-lang-client-0748552619"
     gcs_uri = f"gs://{bucket_name}/articles/{article_id}.json"
-    public_url = f"https://blog-writer-cloudrun-us-central1.a.run.app/article/{article_id}"
+    public_url = f"https://storage.googleapis.com/{bucket_name}/articles/{article_id}.json"
     
     print(f"[GCS UPLOADED] Article '{title}' published to {gcs_uri}")
     
