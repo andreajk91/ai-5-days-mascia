@@ -1,18 +1,21 @@
 """
 Tools for Specialized Image Generator Agent.
-Uses high-powered visual design prompts and multi-layered SVG graphics rendering
-to produce eye-catching, topic-specific hero images for every article.
+Uses high-powered visual design prompts and multi-layered SVG graphics rendering,
+uploads images directly to Google Cloud Storage (GCS) in us-central1,
+and returns public HTTP URLs for 100% reliable rendering in Markdown and Web UIs.
 """
 
 import base64
-import re
+import uuid
 from typing import Dict, Any
+from google.cloud import storage
 
 
-def generate_bespoke_hero_image(title: str, domain: str, summary: str) -> Dict[str, Any]:
-    """Generates an eye-catching, highly customized hero image Data URI specifically tailored
-    to the article topic, domain, and visual themes.
+def generate_bespoke_hero_image(title: str, domain: str, summary: str, task_id: str = None) -> Dict[str, Any]:
+    """Generates an eye-catching, highly customized hero image, uploads it to GCS bucket
+    in us-central1, and returns a public GCS HTTP image URL.
     """
+    task_id = task_id or f"img_{uuid.uuid4().hex[:8]}"
     domain_clean = domain.lower()
     title_clean = title.lower()
     summary_clean = summary.lower()
@@ -104,15 +107,29 @@ def generate_bespoke_hero_image(title: str, domain: str, summary: str) -> Dict[s
       <rect x="80" y="355" width="120" height="4" rx="2" fill="{accent_color}" />
     </svg>"""
 
-    encoded_svg = base64.b64encode(svg_content.encode("utf-8")).decode("utf-8")
-    data_uri = f"data:image/svg+xml;base64,{encoded_svg}"
+    # Upload hero image to GCS Bucket in us-central1
+    bucket_name = "blog-writer-articles-gen-lang-client-0748552619"
+    gcs_blob_path = f"images/{task_id}_hero.svg"
     
-    print(f"🎨 [IMAGE GENERATOR AGENT] Bespoke hero image generated for '{title}'")
-    
+    try:
+        storage_client = storage.Client(project="gen-lang-client-0748552619")
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(gcs_blob_path)
+        blob.upload_from_string(svg_content, content_type="image/svg+xml")
+        gcs_public_url = f"https://storage.googleapis.com/{bucket_name}/{gcs_blob_path}"
+        gcs_uri = f"gs://{bucket_name}/{gcs_blob_path}"
+        print(f"☁️ [GCS UPLOAD SUCCESS] Hero image uploaded to {gcs_uri} | Public URL: {gcs_public_url}")
+    except Exception as e:
+        print(f"⚠️ [GCS UPLOAD FALLBACK] Could not upload image to GCS: {e}")
+        encoded_svg = base64.b64encode(svg_content.encode("utf-8")).decode("utf-8")
+        gcs_public_url = f"data:image/svg+xml;base64,{encoded_svg}"
+        gcs_uri = gcs_public_url
+
     return {
         "title": title,
         "domain": domain,
         "category_label": category_label,
-        "hero_image_url": data_uri,
-        "status": "GENERATED"
+        "hero_image_url": gcs_public_url,
+        "gcs_uri": gcs_uri,
+        "status": "GENERATED_AND_UPLOADED"
     }

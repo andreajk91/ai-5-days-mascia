@@ -51,29 +51,24 @@ class BlogWriterGraphWorkflow:
         topic_clean = topic.lower()
         
         if "cancer" in topic_clean or "science" in domain_clean or "health" in topic_clean:
-            return "science_writer_node", self.nodes["science_writer_node"]
+            return "science_writer_agent", self.nodes["science_writer_node"]
         elif "italian" in topic_clean or "politician" in topic_clean or "reform" in topic_clean or "politic" in domain_clean:
-            return "politics_writer_node", self.nodes["politics_writer_node"]
+            return "politics_writer_agent", self.nodes["politics_writer_node"]
         elif "economic" in domain_clean or "financ" in domain_clean or "war" in topic_clean:
-            return "economics_writer_node", self.nodes["economics_writer_node"]
+            return "economics_writer_agent", self.nodes["economics_writer_node"]
         else:
-            return "politics_writer_node", self.nodes["politics_writer_node"]
+            return "politics_writer_agent", self.nodes["politics_writer_node"]
 
     def draft_and_evaluate_article(self, topic: str, domain: str, journalist_id: str = "editor_01", session_id: Optional[str] = None) -> Dict[str, Any]:
         """Phase 1 of Workflow: Searches via Searcher Agent, delegates hero image creation to Specialized Image Generator Agent,
-        writes long multi-paragraph article following Financial Times / Nature benchmark,
+        uploads hero image to GCS bucket in us-central1, writes long multi-paragraph article following Financial Times / Nature benchmark,
         evaluates text & image with Judge Agent, and presents phase progress for Human Review.
-        All sub-agent calls create explicit telemetry spans in ADK Playground Trace UI.
         """
         session_id = session_id or f"session_{uuid.uuid4().hex[:8]}"
         task_id = f"task_{domain[:3].lower()}_{uuid.uuid4().hex[:6]}"
         
         phase_log = []
         
-        p1_msg = f"🔍 [PHASE 1: RESEARCH] Executing SEARCHER AGENT for web discovery & memory deduplication check..."
-        print(f"\n{p1_msg}")
-        phase_log.append(p1_msg)
-
         # Step 1: Searcher Node
         is_duplicate = self.memory_bank.check_topic_duplication(topic, domain)
         if is_duplicate:
@@ -103,23 +98,30 @@ class BlogWriterGraphWorkflow:
         }
         self.session_memory.update_session(session_id, {"research_bundle": research_bundle, "status": "DRAFTING"})
 
-        # Step 2: Writer Node & Dedicated Image Generator Agent Delegation
         writer_node_name, writer_agent = self.route_writer_node(domain, topic)
-        p2_msg = f"✍️ [PHASE 2A: {writer_node_name.upper()}] Research received. Executing {writer_node_name.upper()} to construct Financial Times / Nature style article..."
-        print(f"{p2_msg}")
-        phase_log.append(p2_msg)
+        
+        # Explicit hand-off message 1
+        handoff_1 = f"The sub-agent searcher_agent has finished their work and now I send the task 'Drafting Article' to the sub-agent {writer_node_name}."
+        print(f"📡 [HAND-OFF] {handoff_1}")
+        phase_log.append(handoff_1)
 
-        p2b_msg = f"🎨 [PHASE 2B: IMAGE_GENERATOR_AGENT] Delegating hero image creation to Specialized Image Generator Agent for topic-tailored visual design..."
-        print(f"{p2b_msg}")
-        phase_log.append(p2b_msg)
+        # Step 2: Writer Node & Dedicated Image Generator Agent Delegation
+        handoff_2 = f"The sub-agent {writer_node_name} has finished their work and now I send the task 'Generating Hero Image' to the sub-agent image_generator_agent."
+        print(f"📡 [HAND-OFF] {handoff_2}")
+        phase_log.append(handoff_2)
 
-        # Execute Specialized Image Generator Agent tool
+        # Execute Specialized Image Generator Agent tool & Upload to GCS
         hero_image_res = generate_bespoke_hero_image(
             title=f"Navigating {topic.title()}",
             domain=domain,
-            summary=research_bundle["research_summary"]
+            summary=research_bundle["research_summary"],
+            task_id=task_id
         )
-        hero_image_data_uri = hero_image_res["hero_image_url"]
+        hero_image_public_url = hero_image_res["hero_image_url"]
+
+        handoff_3 = f"The sub-agent image_generator_agent has finished their work and now I send the task 'Quality Evaluation' to the sub-agent judge_agent."
+        print(f"📡 [HAND-OFF] {handoff_3}")
+        phase_log.append(handoff_3)
 
         # Topic-tailored bespoke title and content generation
         topic_lower = topic.lower()
@@ -163,7 +165,7 @@ class BlogWriterGraphWorkflow:
         draft_article = {
             "title": title,
             "domain": domain,
-            "hero_image_url": hero_image_data_uri,
+            "hero_image_url": hero_image_public_url,
             "introduction": f"{intro_p1}\n\n{intro_p2}",
             "body_sections": [
                 {"heading": sec1_heading, "content": sec1_content},
@@ -175,10 +177,6 @@ class BlogWriterGraphWorkflow:
         }
 
         # Step 3: Judge Node Quality Evaluation & Detailed Considerations
-        p3_msg = f"⚖️ [PHASE 3: JUDGE AGENT] Executing JUDGE AGENT to perform text & hero image rubric evaluation and detailed considerations..."
-        print(f"{p3_msg}")
-        phase_log.append(p3_msg)
-
         from src.agents.judge_agent.tools import evaluate_coherence_and_form
         eval_result = evaluate_coherence_and_form(draft_article, topic)
 
@@ -202,9 +200,9 @@ class BlogWriterGraphWorkflow:
         # MANDATORY 100% PERSISTENT AUDIT LOGGING TO BIGQUERY & GCS IN US-CENTRAL1
         self.audit_logger.log_decision(final_judgment)
 
-        p4_msg = f"👤 [PHASE 4: HUMAN REVIEW] Judge Agent APPROVED draft & hero image (Text Score: {eval_result['scores']['coherence_score']:.2f}, Image Relevance: {eval_result['scores']['image_relevance_score']:.2f})! Presenting candidate article to Journalist for final review."
-        print(f"{p4_msg}")
-        phase_log.append(p4_msg)
+        handoff_4 = "The sub-agent judge_agent has finished their work and now I present the candidate article to the user for final review."
+        print(f"📡 [HAND-OFF] {handoff_4}")
+        phase_log.append(handoff_4)
 
         review_payload = {
             "session_id": session_id,

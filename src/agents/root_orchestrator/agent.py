@@ -2,7 +2,7 @@
 Root Orchestrator Agent.
 Serves as the primary entry point registered with Gemini Enterprise.
 Orchestrates multi-agent production across Searcher, Writer, Image Generator, and Judge sub-agents,
-displaying clear phase declarations, long Financial Times benchmark structure, and detailed Judge considerations (including image evaluation).
+displaying explicit sub-agent hand-off notifications, GCS public image URLs, Financial Times benchmark structure, and detailed Judge considerations.
 """
 
 from google.adk.agents import Agent
@@ -35,28 +35,28 @@ Your primary duty is to orchestrate and display the complete multi-agent workflo
      - Determine the domain: "Politicals", "Economics", or "Science".
      - IMMEDIATELY call the `draft_blog_post` tool with topic and domain.
 
-2. **Multi-Agent Pipeline Sub-Agent Delegation**:
-   - **Step 1 (Searcher)**: Delegate web research and topic deduplication to `searcher_agent`.
-   - **Step 2 (SME Writer)**: Delegate article drafting to specialized SME Writer (`politics_writer_agent`, `economics_writer_agent`, or `science_writer_agent`) following the Financial Times / Foreign Affairs / Nature benchmark exemplar.
-   - **Step 3 (Image Generator)**: Delegate hero image creation to `image_generator_agent` to construct a bespoke, topic-tailored hero image Data URI.
-   - **Step 4 (Judge)**: Delegate quality rubric evaluation (text AND hero image design/relevance), detailed qualitative considerations, and persistent BigQuery/GCS audit logging to `judge_agent`.
-   - **Step 5 (Human Review)**: Present the approved candidate article to the Journalist for final review.
+2. **Explicit Sub-Agent Hand-off Notifications**:
+   Always report sub-agent completion and hand-offs to the user using this exact message pattern:
+   - "The sub-agent **searcher_agent** has finished their work and now I send the task 'Drafting Article' to the sub-agent **[writer_agent_name]**."
+   - "The sub-agent **[writer_agent_name]** has finished their work and now I send the task 'Generating Hero Image' to the sub-agent **image_generator_agent**."
+   - "The sub-agent **image_generator_agent** has finished their work and now I send the task 'Quality Evaluation' to the sub-agent **judge_agent**."
+   - "The sub-agent **judge_agent** has finished their work and now I present the candidate article to the user for final review."
 
 3. **Required User Presentation Format**:
    Always structure your response to the user with the following clear sections:
 
    ---
-   ### 🚦 WORKFLOW PHASE PROGRESS
-   * **🔍 [PHASE 1: RESEARCH]**: Web discovery & topic deduplication completed by Searcher Agent.
-   * **✍️ [PHASE 2A: DRAFTING]**: Financial Times / Foreign Affairs / Nature benchmark article constructed by Writer Agent.
-   * **🎨 [PHASE 2B: VISUAL DESIGN]**: Bespoke, topic-tailored hero image created by Image Generator Agent.
-   * **⚖️ [PHASE 3: EVALUATION]**: Comprehensive text & hero image rubric evaluation & 100% BigQuery/GCS persistent audit logged by Judge Agent.
-   * **👤 [PHASE 4: HUMAN REVIEW]**: Candidate draft ready for Journalist final review.
+   ### 📡 SUB-AGENT WORKFLOW HAND-OFF NOTIFICATIONS
+   * The sub-agent **searcher_agent** has finished their work and now I send the task 'Drafting Article' to the sub-agent **[writer_agent_name]**.
+   * The sub-agent **[writer_agent_name]** has finished their work and now I send the task 'Generating Hero Image' to the sub-agent **image_generator_agent**.
+   * The sub-agent **image_generator_agent** has finished their work and now I send the task 'Quality Evaluation' to the sub-agent **judge_agent**.
+   * The sub-agent **judge_agent** has finished their work and now I present the candidate article to the user for final review.
 
    ---
    # [Title from draft_blog_post]
 
    ![Hero Image](hero_image_url)
+   *(Hero Image Asset stored in GCS Bucket us-central1: hero_image_url)*
 
    ## Introduction
    [Introduction text]
