@@ -12,66 +12,91 @@ from google.cloud import storage
 
 
 def generate_bespoke_hero_image(title: str, domain: str, summary: str, task_id: str = None) -> Dict[str, Any]:
-    """Generates an eye-catching, highly customized hero image, uploads it to GCS bucket
-    in us-central1, and returns a public GCS HTTP image URL.
+    """Generates a dynamic, topic-tailored, visually unique hero image for every turn,
+    uploads it to GCS bucket in us-central1, and returns a public GCS HTTP image URL.
     """
     task_id = task_id or f"img_{uuid.uuid4().hex[:8]}"
     domain_clean = domain.lower()
     title_clean = title.lower()
     summary_clean = summary.lower()
-    
-    # Topic-specific visual theme derivation
-    if "cancer" in title_clean or "cancer" in summary_clean or "health" in domain_clean or "science" in domain_clean:
-        bg_gradient = "linear-gradient(135deg, #1e0826 0%, #3b0764 50%, #4c1d95 100%)"
-        accent_color = "#c084fc"
-        glow_color = "#a855f7"
-        icon_symbol = "🧬"
-        category_label = "ONCOLOGY & SCIENCE BREAKTHROUGH"
-        pattern_svg = """
-        <circle cx="650" cy="120" r="90" fill="#a855f7" opacity="0.25" filter="blur(20px)"/>
-        <circle cx="150" cy="300" r="110" fill="#c084fc" opacity="0.2" filter="blur(25px)"/>
-        <path d="M 50,200 Q 200,100 350,200 T 650,200" stroke="#c084fc" stroke-width="3" fill="none" opacity="0.4"/>
-        <path d="M 50,200 Q 200,300 350,200 T 650,200" stroke="#a855f7" stroke-width="3" fill="none" opacity="0.4"/>
-        """
-    elif "politic" in domain_clean or "reform" in title_clean or "policy" in title_clean or "governance" in title_clean:
+    combined_text = f"{title_clean} {summary_clean}"
+
+    # 1. Dynamic Topic & Country Flag / Icon Derivation
+    if "uk" in combined_text or "british" in combined_text or "britain" in combined_text:
+        icon_symbol = "🇬🇧"
+        country_tag = "UNITED KINGDOM"
+        bg_gradient = "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)"
+        accent_color = "#60a5fa"
+        glow_color = "#3b82f6"
+    elif "spain" in combined_text or "spanish" in combined_text:
+        icon_symbol = "🇪🇸"
+        country_tag = "SPAIN"
+        bg_gradient = "linear-gradient(135deg, #1f1209 0%, #451a03 50%, #78350f 100%)"
+        accent_color = "#f59e0b"
+        glow_color = "#d97706"
+    elif "italy" in combined_text or "italian" in combined_text:
+        icon_symbol = "🇮🇹"
+        country_tag = "ITALY"
         bg_gradient = "linear-gradient(135deg, #022c22 0%, #064e3b 50%, #0f766e 100%)"
         accent_color = "#34d399"
         glow_color = "#10b981"
-        icon_symbol = "🏛️"
-        category_label = "ITALIAN POLICY & GOVERNANCE" if ("italian" in title_clean or "italy" in title_clean) else "POLITICAL & GOVERNANCE ANALYSIS"
-        pattern_svg = """
-        <rect x="580" y="80" width="140" height="220" rx="8" fill="#10b981" opacity="0.15" stroke="#34d399" stroke-width="1.5"/>
-        <line x1="600" y1="120" x2="700" y2="120" stroke="#34d399" stroke-width="2" opacity="0.5"/>
-        <line x1="600" y1="160" x2="700" y2="160" stroke="#34d399" stroke-width="2" opacity="0.5"/>
-        <line x1="600" y1="200" x2="700" y2="200" stroke="#34d399" stroke-width="2" opacity="0.5"/>
-        <circle cx="120" cy="100" r="80" fill="#34d399" opacity="0.1" filter="blur(20px)"/>
-        """
-
-    else:  # Economic, Middle East, War, Finance
-        bg_gradient = "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)"
+    elif "france" in combined_text or "french" in combined_text:
+        icon_symbol = "🇫🇷"
+        country_tag = "FRANCE"
+        bg_gradient = "linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #3a506b 100%)"
+        accent_color = "#38bdf8"
+        glow_color = "#0284c7"
+    elif "us" in combined_text or "american" in combined_text or "united states" in combined_text:
+        icon_symbol = "🇺🇸"
+        country_tag = "UNITED STATES"
+        bg_gradient = "linear-gradient(135deg, #020617 0%, #1e1b4b 50%, #1e293b 100%)"
+        accent_color = "#f43f5e"
+        glow_color = "#e11d48"
+    elif "cancer" in combined_text or "health" in combined_text or "oncology" in combined_text or "medicine" in combined_text:
+        icon_symbol = "🧬"
+        country_tag = "ONCOLOGY & MEDICAL SCIENCE"
+        bg_gradient = "linear-gradient(135deg, #1e0826 0%, #3b0764 50%, #4c1d95 100%)"
+        accent_color = "#c084fc"
+        glow_color = "#a855f7"
+    elif "space" in combined_text or "quantum" in combined_text or "technology" in combined_text or "science" in domain_clean:
+        icon_symbol = "🔬"
+        country_tag = "ADVANCED SCIENCE & TECH"
+        bg_gradient = "linear-gradient(135deg, #030712 0%, #0f172a 50%, #1e1b4b 100%)"
+        accent_color = "#22d3ee"
+        glow_color = "#06b6d4"
+    elif "inflation" in combined_text or "market" in combined_text or "economic" in domain_clean or "trade" in combined_text:
+        icon_symbol = "📊"
+        country_tag = "GLOBAL MACROECONOMICS"
+        bg_gradient = "linear-gradient(135deg, #1c1917 0%, #44403c 50%, #292524 100%)"
         accent_color = "#fbbf24"
         glow_color = "#f59e0b"
-        icon_symbol = "📊"
-        category_label = "GLOBAL MACROECONOMIC REPORT"
-        pattern_svg = """
-        <polyline points="80,320 220,240 380,270 520,160 680,100" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
-        <circle cx="680" cy="100" r="8" fill="#fbbf24"/>
-        <circle cx="680" cy="100" r="24" fill="#fbbf24" opacity="0.25"/>
-        <rect x="60" y="60" width="680" height="280" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="6,6" opacity="0.2"/>
-        """
+    else:
+        icon_symbol = "🏛️"
+        country_tag = "GEOPOLITICAL & POLICY REPORT"
+        bg_gradient = "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)"
+        accent_color = "#38bdf8"
+        glow_color = "#0284c7"
 
-    display_title = title[:50] + ("..." if len(title) > 50 else "")
+    # 2. Dynamic Category Label & Title Formatting
+    category_label = f"{domain.upper()} • {country_tag}"
+    display_title = title[:52] + ("..." if len(title) > 52 else "")
+
+    # 3. Dynamic Topic-Derived SVG Graphics
+    hash_val = sum(ord(c) for c in title) % 100
+    circle1_x = 100 + (hash_val * 6) % 700
+    circle2_x = 700 - (hash_val * 4) % 600
+    grid_opacity = 0.15 + (hash_val % 10) * 0.01
 
     svg_content = f"""<svg xmlns="http://www.w3.org/2000/svg" width="900" height="450" viewBox="0 0 900 450">
       <defs>
         <linearGradient id="bg_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
-          <stop offset="50%" style="stop-color:#1e293b;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#020617;stop-opacity:1" />
+          <stop offset="0%" style="stop-color:#020617;stop-opacity:1" />
+          <stop offset="50%" style="stop-color:#0f172a;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#1e293b;stop-opacity:1" />
         </linearGradient>
         <linearGradient id="card_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#1e293b;stop-opacity:0.95" />
-          <stop offset="100%" style="stop-color:#0f172a;stop-opacity:0.95" />
+          <stop offset="0%" style="stop-color:#0f172a;stop-opacity:0.92" />
+          <stop offset="100%" style="stop-color:#020617;stop-opacity:0.92" />
         </linearGradient>
         <filter id="glow">
           <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
@@ -83,30 +108,34 @@ def generate_bespoke_hero_image(title: str, domain: str, summary: str, task_id: 
       </defs>
       
       <!-- Base Background -->
-      <rect width="900" height="450" fill="url(#bg_grad)" />
+      <rect width="900" height="450" fill="{bg_gradient}" />
       
-      <!-- Custom Pattern Elements -->
-      {pattern_svg}
+      <!-- Dynamic Geometric Background Graphics -->
+      <circle cx="{circle1_x}" cy="100" r="120" fill="{accent_color}" opacity="{grid_opacity}" filter="url(#glow)"/>
+      <circle cx="{circle2_x}" cy="350" r="140" fill="{glow_color}" opacity="{grid_opacity - 0.05}" filter="url(#glow)"/>
+      <path d="M 0,225 Q 225,120 450,225 T 900,225" stroke="{accent_color}" stroke-width="2" fill="none" opacity="0.3"/>
+      <path d="M 0,225 Q 225,330 450,225 T 900,225" stroke="{glow_color}" stroke-width="2" fill="none" opacity="0.2"/>
       
       <!-- Glassmorphic Central Card Container -->
-      <rect x="50" y="45" width="800" height="360" rx="20" fill="url(#card_grad)" stroke="{accent_color}" stroke-width="2" stroke-opacity="0.5" filter="url(#glow)" />
+      <rect x="50" y="45" width="800" height="360" rx="20" fill="url(#card_grad)" stroke="{accent_color}" stroke-width="2" stroke-opacity="0.6" filter="url(#glow)" />
       
-      <!-- Domain & Topic Category Badge -->
-      <rect x="80" y="80" width="280" height="36" rx="18" fill="{accent_color}" fill-opacity="0.18" stroke="{accent_color}" stroke-width="1" />
-      <text x="220" y="103" fill="{accent_color}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" letter-spacing="1">{category_label}</text>
+      <!-- Domain & Dynamic Topic Category Badge -->
+      <rect x="80" y="80" width="360" height="36" rx="18" fill="{accent_color}" fill-opacity="0.2" stroke="{accent_color}" stroke-width="1.5" />
+      <text x="260" y="103" fill="{accent_color}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" letter-spacing="1.5">{category_label}</text>
       
-      <!-- Eye-Catching Icon Symbol -->
-      <text x="80" y="210" font-size="64" filter="url(#glow)">{icon_symbol}</text>
+      <!-- Topic Flag / Icon Symbol -->
+      <text x="80" y="210" font-size="60" filter="url(#glow)">{icon_symbol}</text>
       
       <!-- Dynamic Article Title -->
-      <text x="80" y="280" fill="#ffffff" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="26" font-weight="bold">{display_title}</text>
+      <text x="80" y="275" fill="#ffffff" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="24" font-weight="bold">{display_title}</text>
       
       <!-- Editorial Subtitle -->
-      <text x="80" y="325" fill="#94a3b8" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15">AUTOMATED BLOG WRITER PLATFORM • SPECIALIZED IMAGE GENERATOR AGENT</text>
+      <text x="80" y="320" fill="#94a3b8" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" letter-spacing="0.5">AUTOMATED BLOG WRITER PLATFORM • DYNAMIC HERO IMAGE</text>
       
       <!-- High-Tech Accent Bar -->
-      <rect x="80" y="355" width="120" height="4" rx="2" fill="{accent_color}" />
+      <rect x="80" y="350" width="140" height="4" rx="2" fill="{accent_color}" />
     </svg>"""
+
 
     # Upload hero image to GCS Bucket in us-central1
     bucket_name = "blog-writer-articles-gen-lang-client-0748552619"
