@@ -96,5 +96,4 @@ Your primary duty is to orchestrate and display the complete multi-agent workflo
         judge_agent,
         image_generator_agent,
     ],
-    tools=[draft_blog_post, publish_blog_post, publish_to_gcs]
 )

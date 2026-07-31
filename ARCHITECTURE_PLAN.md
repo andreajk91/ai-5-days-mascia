@@ -246,7 +246,39 @@ ai-5-days-mascia/
 
 ---
 
-## 10. Implementation Roadmap & Milestones
+## 10. Production A2A Agent Card Architecture & Deployment Sequence
+
+To achieve **100% A2A Protocol Compliance** in production while maintaining fast local development iteration, the system follows a two-tier execution and deployment lifecycle:
+
+### A. Local Development & Testing Tier (Current)
+- In-process ADK `Agent` instantiation (`sub_agents=[...]`) and local Python graph orchestration (`src/graph_workflow.py`).
+- Allows rapid debugging, mock testing, and dry-run benchmarks without network overhead.
+
+### B. Production Deployment & A2A Agent Card Registry Tier (Mandatory Pre-Deployment Rule)
+Before deploying the Root Orchestrator and exposing the system in production, the deployment sequence MUST execute in the following exact order:
+
+1. **Sub-Agent First-Stage Deployment**:
+   - Deploy all specialized sub-agents individually to Cloud Run / Agent Runtime endpoints:
+     - `searcher_agent`
+     - `politics_writer_agent`
+     - `economics_writer_agent`
+     - `science_writer_agent`
+     - `judge_agent`
+     - `image_generator_agent`
+2. **AgentCard Export & Writing**:
+   - Upon deployment, each sub-agent generates and exports its standardized `AgentCard` JSON schema (`src/common/a2a_protocol.py`), specifying:
+     - `name`, `description`, `version`
+     - `domain` specialization (`"Politicals"`, `"Economics"`, `"Science"`, or `"All"`)
+     - `endpoint_url` (deployed Cloud Run / Agent Runtime HTTPS URI)
+     - `capabilities` list
+3. **Root Orchestrator AgentCard Registry Reference**:
+   - Write and attach the generated `AgentCard`s into the Root Orchestrator's active A2A Registry map (`AGENT_CARDS`).
+4. **100% Production A2A Protocol Communication**:
+   - In production, the Root Orchestrator routes all inter-agent communication strictly via the A2A Protocol, transmitting `A2AMessage` JSON payloads over HTTP/gRPC to the respective `AgentCard.endpoint_url`.
+
+---
+
+## 11. Implementation Roadmap & Milestones
 
 | Phase | Key Deliverables | Verification / Acceptance Gate |
 | :--- | :--- | :--- |
@@ -255,4 +287,5 @@ ai-5-days-mascia/
 | **Phase 2: ADK 2.0 Graph Workflow & Agent Logic** | - Define ADK 2.0 graph workflow nodes & edges (`src/graph_workflow.py`)<br>- Connect Searcher, Writer (3 domains), Judge, and HITL nodes<br>- Connect Shared Session & Long Retention Memory<br>- Integrate 100% persistent Judge Audit logging to BigQuery/GCS | `agents-cli run` completes full multi-agent graph dry run; Judge log entry verified in BigQuery/GCS. |
 | **Phase 3: Evaluation Suite & Dashboard** | - Write evaluation datasets and LLM-as-judge rules<br>- Build Streamlit evaluation dashboard connected to Judge Audit Store<br>- Push eval scripts to GitHub | `agents-cli eval run` generates quality reports and renders judge history on dashboard. |
 | **Phase 4: Web Frontend & Cloud Run** | - Build Next.js / Vite web application<br>- Implement GCS article fetcher & Thumbs API<br>- Dockerize and configure Cloud Run | Web app renders articles from GCS with live thumbs voting. |
-| **Phase 5: Production Deployment & Push** | - Deploy Cloud Run service and Agent Runtime<br>- Register Root Agent with Gemini Enterprise<br>- Perform final `git push` of full codebase | Complete production system live and fully synchronized on GitHub. |
+| **Phase 5: Production Deployment, A2A Agent Card Integration & Push** | - **Sub-Agent First Deployment**: Deploy all 6 sub-agents first.<br>- **AgentCard Generation & Writing**: Capture live sub-agent endpoint URLs and write `AgentCard` metadata.<br>- **Root Orchestrator A2A Mapping**: Register sub-agent `AgentCard`s in Root Orchestrator for 100% production A2A HTTP/gRPC routing.<br>- Deploy Root Agent & Cloud Run frontend.<br>- Register Root Agent with Gemini Enterprise.<br>- Final `git push` of full codebase. | Complete production system live, 100% A2A compliant via AgentCards, and synchronized on GitHub. |
+

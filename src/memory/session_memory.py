@@ -7,11 +7,14 @@ from typing import Dict, Any, Optional
 import time
 
 
+_GLOBAL_SESSIONS: Dict[str, Dict[str, Any]] = {}
+
+
 class SharedSessionMemory:
     """In-memory and persistent session state manager shared across agents."""
 
     def __init__(self):
-        self._sessions: Dict[str, Dict[str, Any]] = {}
+        self._sessions = _GLOBAL_SESSIONS
 
     def get_session(self, session_id: str) -> Dict[str, Any]:
         if session_id not in self._sessions:
@@ -19,6 +22,7 @@ class SharedSessionMemory:
                 "created_at": time.time(),
                 "topic": "",
                 "domain": "",
+                "task_id": "",
                 "research_bundle": None,
                 "current_draft": None,
                 "judge_critiques": [],
@@ -32,3 +36,4 @@ class SharedSessionMemory:
         session.update(updates)
         session["updated_at"] = time.time()
         return session
+

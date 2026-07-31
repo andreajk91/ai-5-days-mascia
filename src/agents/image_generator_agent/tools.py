@@ -33,12 +33,12 @@ def generate_bespoke_hero_image(title: str, domain: str, summary: str, task_id: 
         <path d="M 50,200 Q 200,100 350,200 T 650,200" stroke="#c084fc" stroke-width="3" fill="none" opacity="0.4"/>
         <path d="M 50,200 Q 200,300 350,200 T 650,200" stroke="#a855f7" stroke-width="3" fill="none" opacity="0.4"/>
         """
-    elif "italian" in title_clean or "politician" in title_clean or "reform" in title_clean or "politic" in domain_clean:
+    elif "politic" in domain_clean or "reform" in title_clean or "policy" in title_clean or "governance" in title_clean:
         bg_gradient = "linear-gradient(135deg, #022c22 0%, #064e3b 50%, #0f766e 100%)"
         accent_color = "#34d399"
         glow_color = "#10b981"
         icon_symbol = "🏛️"
-        category_label = "ITALIAN POLICY & GOVERNANCE"
+        category_label = "ITALIAN POLICY & GOVERNANCE" if ("italian" in title_clean or "italy" in title_clean) else "POLITICAL & GOVERNANCE ANALYSIS"
         pattern_svg = """
         <rect x="580" y="80" width="140" height="220" rx="8" fill="#10b981" opacity="0.15" stroke="#34d399" stroke-width="1.5"/>
         <line x1="600" y1="120" x2="700" y2="120" stroke="#34d399" stroke-width="2" opacity="0.5"/>
@@ -46,6 +46,7 @@ def generate_bespoke_hero_image(title: str, domain: str, summary: str, task_id: 
         <line x1="600" y1="200" x2="700" y2="200" stroke="#34d399" stroke-width="2" opacity="0.5"/>
         <circle cx="120" cy="100" r="80" fill="#34d399" opacity="0.1" filter="blur(20px)"/>
         """
+
     else:  # Economic, Middle East, War, Finance
         bg_gradient = "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)"
         accent_color = "#fbbf24"

@@ -24,8 +24,11 @@ def run_test_suite():
     
     results = []
     for test in test_cases:
-        res = workflow.run_workflow(topic=test["topic"], domain=test["domain"], journalist_id="journalist_alex")
-        results.append(res)
+        review_payload = workflow.draft_and_evaluate_article(topic=test["topic"], domain=test["domain"], journalist_id="journalist_alex")
+        session_id = review_payload["session_id"]
+        pub_result = workflow.publish_approved_article(session_id=session_id)
+        pub_result["judge_audit"] = review_payload["judge_audit"]
+        results.append(pub_result)
         
     print("\n==================================================")
     print("✅ ALL 3 DOMAIN WORKFLOW TESTS PASSED CLEANLY!")
@@ -35,6 +38,7 @@ def run_test_suite():
         print(f" GCS URI: {r['gcs_uri']}")
         print(f" Judge Decision: {r['judge_audit']['decision']} (Score: {r['judge_audit']['rubric_scores']['coherence_score']:.2f})")
         print("--------------------------------------------------")
+
 
 
 if __name__ == "__main__":
