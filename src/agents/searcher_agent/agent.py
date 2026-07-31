@@ -14,8 +14,9 @@ from .tools import web_search_news, fetch_article_content
 
 searcher_agent = Agent(
     name="searcher_agent",
-    model="gemini-3.6-flash",
+    model="gemini-2.5-flash-lite",
     generate_content_config=get_permissive_safety_config(),
+
     before_model_callback=before_model_sanitize_callback,
     instruction="""You are the Searcher Agent.
 Your primary role is to find 3 to 4 high-quality, credible news articles for the given topic and domain using `web_search_news` and `fetch_article_content`.

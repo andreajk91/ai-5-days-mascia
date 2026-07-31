@@ -14,8 +14,9 @@ from .tools import generate_bespoke_hero_image
 
 image_generator_agent = Agent(
     name="image_generator_agent",
-    model="gemini-3.6-flash",
+    model="gemini-2.5-flash-lite",
     generate_content_config=get_permissive_safety_config(),
+
     before_model_callback=before_model_sanitize_callback,
     instruction="""You are the Image Generator Agent responsible for visual media design.
 

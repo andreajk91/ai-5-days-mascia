@@ -26,67 +26,26 @@ root_orchestrator_agent = Agent(
     before_model_callback=before_model_sanitize_callback,
     instruction="""You are the Root Orchestrator Agent for the Automated Blog Writer Platform.
 
-Your primary duty is to orchestrate and display the complete multi-agent workflow whenever a user requests an article:
+Your primary duty is to coordinate article creation across specialized domain sub-agents and tools.
 
-1. **Mandatory Action on User Request**:
-   - When the user requests an article on ANY topic:
-     - Determine the domain: "Politicals", "Economics", or "Science".
-     - IMMEDIATELY call the `draft_blog_post` tool with topic and domain.
-
-2. **Explicit Sub-Agent Hand-off Notifications**:
-   Always report sub-agent completion and hand-offs to the user using this exact message pattern:
-   - "The sub-agent **searcher_agent** has finished their work and now I send the task 'Drafting Article' to the sub-agent **[writer_agent_name]**."
-   - "The sub-agent **[writer_agent_name]** has finished their work and now I send the task 'Generating Hero Image' to the sub-agent **image_generator_agent**."
-   - "The sub-agent **image_generator_agent** has finished their work and now I send the task 'Quality Evaluation' to the sub-agent **judge_agent**."
-   - "The sub-agent **judge_agent** has finished their work and now I present the candidate article to the user for final review."
-
-3. **Required User Presentation Format**:
-   Always structure your response to the user with the following clear sections:
-
-   ---
-   ### 📡 SUB-AGENT WORKFLOW HAND-OFF NOTIFICATIONS
-   * The sub-agent **searcher_agent** has finished their work and now I send the task 'Drafting Article' to the sub-agent **[writer_agent_name]**.
-   * The sub-agent **[writer_agent_name]** has finished their work and now I send the task 'Generating Hero Image' to the sub-agent **image_generator_agent**.
-   * The sub-agent **image_generator_agent** has finished their work and now I send the task 'Quality Evaluation' to the sub-agent **judge_agent**.
-   * The sub-agent **judge_agent** has finished their work and now I present the candidate article to the user for final review.
-
-   ---
-   # [Title from draft_blog_post]
-
-   ![Hero Image](hero_image_url)
-   *(Hero Image Asset stored in GCS Bucket us-central1: hero_image_url)*
-
-   ## Introduction
-   [Introduction text]
-
-   ## 1. Core Structural Drivers & Market Dynamics
-   [Body Section 1 text]
-
-   ## 2. Stakeholder Trade-offs & Fiscal Allocation
-   [Body Section 2 text]
-
-   ## 3. Global Ripple Effects & Systemic Risks
-   [Body Section 3 text]
-
-   ## Conclusion & Strategic Roadmap
-   [Conclusion text]
-
-   ---
-   ### 💡 Editorial Commentary
-   [Editorial Opinion text]
-
-   ---
-   ### ⚖️ JUDGE AGENT EVALUATION & CONSIDERATIONS
-   * **Decision**: APPROVED
-   * **Text Rubric Scores**: Coherence: [coherence_score], Alignment: [alignment_score], Fluency: [fluency_score]
-   * **Hero Image Rubric Scores**: Image Relevance: [image_relevance_score], Image Design Quality: [image_quality_score]
-   * **Detailed Judge Considerations (Why Approved)**:
-     [Insert detailed_considerations from judge_audit]
-   * **Persistent Audit**: Saved to BigQuery (`blog_system_audit.judge_decisions_v1`) and Cloud Storage in us-central1.
-
-   ---
-   **CANDIDATE ARTICLE READY FOR YOUR FINAL REVIEW**
-   Do you approve this article for publication to Google Cloud Storage? Reply **'PUBLISH'** to confirm.
+Workflow Instructions:
+1. When a user requests an article or blog post on any topic:
+   - Identify the primary domain: "Politicals", "Economics", or "Science".
+   - Call the `draft_blog_post` tool with the topic and domain.
+2. Structure your response clearly to present:
+   - The sub-agent workflow hand-off notifications.
+   - The full article title, hero image, introduction, analytical sections, and conclusion.
+   - The editorial commentary and Judge Agent evaluation scores.
+3. When the user confirms with 'PUBLISH', call `publish_blog_post` with the session ID.
 """,
+    sub_agents=[
+        searcher_agent,
+        politics_writer_agent,
+        economics_writer_agent,
+        science_writer_agent,
+        judge_agent,
+        image_generator_agent,
+    ],
     tools=[draft_blog_post, publish_blog_post, publish_to_gcs]
 )
+

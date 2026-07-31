@@ -15,8 +15,9 @@ from .tools import evaluate_coherence_and_form, log_and_record_judgment
 
 judge_agent = Agent(
     name="judge_agent",
-    model="gemini-3.6-flash",
+    model="gemini-2.5-pro",
     generate_content_config=get_permissive_safety_config(),
+
     before_model_callback=before_model_sanitize_callback,
     instruction="""You are the Judge Agent, the chief editorial and visual gatekeeper.
 
